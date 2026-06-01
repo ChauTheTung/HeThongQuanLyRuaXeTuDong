@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<body>
+
+<footer class="aw-footer" th:fragment="customer-footer">
+    <p class="aw-footer__copy">
+        &copy; <span th:text="${T(java.time.Year).now()}">2026</span>
+        <strong>AUTO WASH</strong>. Bảo lưu mọi quyền.
+    </p>
+    <ul class="aw-footer__links">
+        <li><a th:href="@{/terms}">Điều khoản dịch vụ</a></li>
+        <li><a th:href="@{/privacy}">Chính sách bảo mật</a></li>
+        <li><a th:href="@{/support}">Hỗ trợ</a></li>
+    </ul>
+</footer>
+
+</body>
+</html>
