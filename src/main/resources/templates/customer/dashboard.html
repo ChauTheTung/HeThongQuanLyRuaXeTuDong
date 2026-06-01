@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/customer-head :: customer-head('Trang chủ')}"></head>
+<body class="aw-customer-body">
+
+<div class="aw-app">
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('home', 3)}"></aside>
+
+    <div class="aw-main">
+        <header th:replace="~{fragments/navbar :: customer-navbar(null, null, null, 3, null)}"></header>
+
+        <main class="aw-main__content">
+            <!-- Nội dung dashboard khách hàng -->
+            <h2 style="margin:0 0 0.25rem;font-size:1.5rem;">Xin chào, Nguyễn Văn A 👋</h2>
+            <p style="margin:0 0 1.5rem;color:#6b7c93;font-size:0.9rem;">Theo dõi xe, lịch hẹn và ưu đãi của bạn tại đây.</p>
+        </main>
+
+        <footer th:replace="~{fragments/footer :: customer-footer}"></footer>
+    </div>
+</div>
+
+</body>
+</html>
