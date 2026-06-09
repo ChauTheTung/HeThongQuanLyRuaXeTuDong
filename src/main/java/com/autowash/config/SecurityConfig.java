@@ -19,10 +19,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Tắt CSRF để tiện test API thô qua Postman
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Cho phép truy cập tự do toàn bộ endpoint ở Day 1
-            );
+                .requestMatchers(
+                    "/",
+                    "/login",
+                    "/register",
+                    "/forgot-password",
+                    "/css/**",
+                    "/images/**",
+                    "/js/**",
+                    "/customer/**"
+                ).permitAll()
+                .anyRequest().permitAll()
+            )
+            .csrf(csrf -> csrf.disable());
+
         return http.build();
     }
 }

@@ -3,34 +3,78 @@ package com.autowash.controller;
 import com.autowash.dto.LoginDTO;
 import com.autowash.dto.RegisterDTO;
 import com.autowash.service.AuthService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@RestController
-@RequestMapping("/api/auth")
-
+@Controller
 public class AuthController {
 
     private final AuthService authService;
+
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/login";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "auth/login";
+    }
+
+    @GetMapping("/register")
+    public String register() {
+        return "auth/register";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword() {
+        return "redirect:/login";
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDTO dto) {
+    public String register(
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            RedirectAttributes redirectAttributes
+    ) {
+        RegisterDTO dto = new RegisterDTO();
+        dto.setUsername(email);
+        dto.setPassword(password);
+
         String result = authService.register(dto);
         if (result.equals("Tên đăng nhập đã tồn tại!")) {
-            return ResponseEntity.badRequest().body(result);
+            redirectAttributes.addFlashAttribute("error", result);
+            return "redirect:/register";
         }
-        return ResponseEntity.ok(result);
+
+        redirectAttributes.addFlashAttribute("success", result);
+        return "redirect:/login";
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDTO dto) {
+    public String login(
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            RedirectAttributes redirectAttributes
+    ) {
+        LoginDTO dto = new LoginDTO();
+        dto.setUsername(username);
+        dto.setPassword(password);
+
         String result = authService.login(dto);
         if (result.equals("Sai tên đăng nhập hoặc mật khẩu!")) {
-            return ResponseEntity.badRequest().body(result);
+            redirectAttributes.addFlashAttribute("error", result);
+            return "redirect:/login";
         }
-        return ResponseEntity.ok(result);
+
+        redirectAttributes.addFlashAttribute("success", result);
+        return "redirect:/customer/dashboard";
     }
 }
