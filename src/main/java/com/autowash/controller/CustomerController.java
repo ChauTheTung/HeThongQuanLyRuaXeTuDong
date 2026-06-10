@@ -1,32 +1,40 @@
 package com.autowash.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.autowash.entity.Customer;
+import com.autowash.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/customer")
+@RestController
+@RequestMapping("/api/customers")
+@CrossOrigin(origins = "*")
 public class CustomerController {
 
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "customer/dashboard";
+    @Autowired
+    private CustomerService customerService;
+
+    // Feature 1: View profile (Theo Customer ID hoặc User ID)
+    @GetMapping("/{id}")
+    public ResponseEntity<Customer> getCustomerProfile(@PathVariable Long id) {
+        return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
-    @GetMapping("/profile")
-    public String profile(Model model) {
-        model.addAttribute("memberTier", "Gold Member");
-        model.addAttribute("loyaltyPoints", "1.200");
-        model.addAttribute("memberSince", "03/2024");
-        model.addAttribute("totalWashes", "28");
-        model.addAttribute("vehicleCount", "2");
-        model.addAttribute("notificationCount", 3);
-        return "customer/profile";
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Customer> getCustomerProfileByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(customerService.getCustomerByUserId(userId));
     }
 
-    @GetMapping({"/booking", "/vehicles", "/history", "/loyalty", "/promotions", "/notifications", "/search"})
-    public String placeholder() {
-        return "redirect:/customer/dashboard";
+    // Feature 2: Update profile
+    @PutMapping("/{id}")
+    public ResponseEntity<Customer> updateCustomerProfile(@PathVariable Long id, @RequestBody Customer customer) {
+        return ResponseEntity.ok(customerService.updateProfile(id, customer));
+    }
+
+    // Feature 3: View points
+    @GetMapping("/{id}/points")
+    public ResponseEntity<Integer> getCustomerPoints(@PathVariable Long id) {
+        return ResponseEntity.ok(customerService.getLoyaltyPoints(id));
     }
 }
+
