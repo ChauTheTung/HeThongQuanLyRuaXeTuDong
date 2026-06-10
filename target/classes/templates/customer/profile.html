@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/customer-head :: customer-head('Hồ sơ')}"></head>
+<body class="aw-customer-body">
+
+<div class="aw-app"
+     th:with="
+        fullName=${profile != null && profile.fullName != null ? profile.fullName : 'Nguyễn Văn A'},
+        email=${profile != null && profile.email != null ? profile.email : 'nguyenvana@email.com'},
+        phone=${profile != null && profile.phone != null ? profile.phone : '0901 234 567'},
+        address=${profile != null && profile.address != null ? profile.address : '123 Đường Lê Lợi'},
+        city=${profile != null && profile.city != null ? profile.city : 'Quận 1, TP. Hồ Chí Minh'},
+        dateOfBirth=${profile != null && profile.dateOfBirth != null ? profile.dateOfBirth : '1990-05-15'},
+        avatar=${profile != null && profile.avatarUrl != null ? profile.avatarUrl : 'https://i.pravatar.cc/150?img=12'},
+        tier=${memberTier != null ? memberTier : 'Gold Member'},
+        points=${loyaltyPoints != null ? loyaltyPoints : '1.200'},
+        memberSince=${memberSince != null ? memberSince : '03/2024'},
+        totalWashes=${totalWashes != null ? totalWashes : '28'},
+        notifCount=${notificationCount != null ? notificationCount : 3}
+     ">
+
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('profile', ${notifCount})}"></aside>
+
+    <div class="aw-main">
+        <header th:replace="~{fragments/navbar :: customer-navbar(${fullName}, ${tier}, ${points}, ${notifCount}, ${avatar})}"></header>
+
+        <main class="aw-main__content">
+            <div class="aw-page-header">
+                <h2>Hồ sơ của tôi</h2>
+                <p>Quản lý thông tin cá nhân, bảo mật và tùy chọn thông báo.</p>
+            </div>
+
+            <div class="aw-profile-grid">
+                <!-- Cột trái: tóm tắt -->
+                <div class="aw-profile-aside">
+                    <section class="aw-card aw-profile-summary">
+                        <div class="aw-profile-avatar-wrap">
+                            <img class="aw-profile-avatar" th:src="${avatar}" th:alt="${fullName}" width="110" height="110"/>
+                            <button type="button" class="aw-profile-avatar-btn" title="Đổi ảnh đại diện" aria-label="Đổi ảnh đại diện">
+                                <i class="bi bi-camera"></i>
+                            </button>
+                        </div>
+                        <h3 class="aw-profile-name" th:text="${fullName}">Nguyễn Văn A</h3>
+                        <p class="aw-profile-email" th:text="${email}">nguyenvana@email.com</p>
+                        <span class="aw-profile-tier">
+                            <i class="bi bi-star-fill"></i>
+                            <span th:text="${tier}">Gold Member</span>
+                        </span>
+                        <div class="aw-profile-stats">
+                            <div class="aw-profile-stat">
+                                <span class="aw-profile-stat__label">Thành viên từ</span>
+                                <span class="aw-profile-stat__value" th:text="${memberSince}">03/2024</span>
+                            </div>
+                            <div class="aw-profile-stat">
+                                <span class="aw-profile-stat__label">Lần rửa xe</span>
+                                <span class="aw-profile-stat__value" th:text="${totalWashes}">28</span>
+                            </div>
+                            <div class="aw-profile-stat">
+                                <span class="aw-profile-stat__label">Điểm thưởng</span>
+                                <span class="aw-profile-stat__value" th:text="${points}">1.200</span>
+                            </div>
+                            <div class="aw-profile-stat">
+                                <span class="aw-profile-stat__label">Xe đã đăng ký</span>
+                                <span class="aw-profile-stat__value" th:text="${vehicleCount != null ? vehicleCount : '2'}">2</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="aw-card">
+                        <h3 class="aw-card__title"><i class="bi bi-shield-check"></i> Bảo mật nhanh</h3>
+                        <p class="aw-security-hint">Bảo vệ tài khoản bằng mật khẩu mạnh và cập nhật định kỳ 6 tháng/lần.</p>
+                        <a th:href="@{/customer/profile}#security" class="aw-btn aw-btn--outline" style="width:100%;">
+                            <i class="bi bi-key"></i> Đổi mật khẩu
+                        </a>
+                    </section>
+                </div>
+
+                <!-- Cột phải: form -->
+                <div class="aw-profile-main">
+                    <section class="aw-card">
+                        <h3 class="aw-card__title"><i class="bi bi-person"></i> Thông tin cá nhân</h3>
+                        <form th:action="@{/customer/profile}" method="post" th:object="${profile}">
+                            <div class="aw-form-grid">
+                                <div class="aw-form-group">
+                                    <label for="fullName">Họ và tên</label>
+                                    <input type="text" id="fullName" name="fullName"
+                                           th:value="${fullName}" placeholder="Nhập họ và tên" required/>
+                                </div>
+                                <div class="aw-form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email"
+                                           th:value="${email}" placeholder="email@example.com" required/>
+                                </div>
+                                <div class="aw-form-group">
+                                    <label for="phone">Số điện thoại</label>
+                                    <input type="tel" id="phone" name="phone"
+                                           th:value="${phone}" placeholder="090x xxx xxx"/>
+                                </div>
+                                <div class="aw-form-group">
+                                    <label for="dateOfBirth">Ngày sinh</label>
+                                    <input type="date" id="dateOfBirth" name="dateOfBirth"
+                                           th:value="${dateOfBirth}"/>
+                                </div>
+                                <div class="aw-form-group aw-form-group--full">
+                                    <label for="address">Địa chỉ</label>
+                                    <input type="text" id="address" name="address"
+                                           th:value="${address}" placeholder="Số nhà, tên đường"/>
+                                </div>
+                                <div class="aw-form-group aw-form-group--full">
+                                    <label for="city">Tỉnh / Thành phố</label>
+                                    <input type="text" id="city" name="city"
+                                           th:value="${city}" placeholder="Quận, thành phố"/>
+                                </div>
+                            </div>
+                            <div class="aw-form-actions">
+                                <button type="reset" class="aw-btn aw-btn--ghost">Hủy thay đổi</button>
+                                <button type="submit" class="aw-btn aw-btn--primary">
+                                    <i class="bi bi-check-lg"></i> Lưu thông tin
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="aw-card" id="security">
+                        <h3 class="aw-card__title"><i class="bi bi-lock"></i> Đổi mật khẩu</h3>
+                        <form th:action="@{/customer/profile/password}" method="post">
+                            <div class="aw-form-grid">
+                                <div class="aw-form-group aw-form-group--full">
+                                    <label for="currentPassword">Mật khẩu hiện tại</label>
+                                    <input type="password" id="currentPassword" name="currentPassword"
+                                           autocomplete="current-password" required/>
+                                </div>
+                                <div class="aw-form-group">
+                                    <label for="newPassword">Mật khẩu mới</label>
+                                    <input type="password" id="newPassword" name="newPassword"
+                                           autocomplete="new-password" minlength="8" required/>
+                                </div>
+                                <div class="aw-form-group">
+                                    <label for="confirmPassword">Xác nhận mật khẩu</label>
+                                    <input type="password" id="confirmPassword" name="confirmPassword"
+                                           autocomplete="new-password" minlength="8" required/>
+                                </div>
+                            </div>
+                            <div class="aw-form-actions">
+                                <button type="submit" class="aw-btn aw-btn--primary">
+                                    <i class="bi bi-shield-lock"></i> Cập nhật mật khẩu
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="aw-card">
+                        <h3 class="aw-card__title"><i class="bi bi-bell"></i> Tùy chọn thông báo</h3>
+                        <form th:action="@{/customer/profile/notifications}" method="post">
+                            <div class="aw-toggle-list">
+                                <label class="aw-toggle-item">
+                                    <span class="aw-toggle-item__text">
+                                        <strong>Nhắc lịch hẹn rửa xe</strong>
+                                        <span>Thông báo trước 1 giờ khi đến giờ hẹn</span>
+                                    </span>
+                                    <span class="aw-switch">
+                                        <input type="checkbox" name="notifyBooking" checked/>
+                                        <span class="aw-switch__slider"></span>
+                                    </span>
+                                </label>
+                                <label class="aw-toggle-item">
+                                    <span class="aw-toggle-item__text">
+                                        <strong>Khuyến mãi &amp; voucher</strong>
+                                        <span>Nhận ưu đãi mới và mã giảm giá</span>
+                                    </span>
+                                    <span class="aw-switch">
+                                        <input type="checkbox" name="notifyPromo" checked/>
+                                        <span class="aw-switch__slider"></span>
+                                    </span>
+                                </label>
+                                <label class="aw-toggle-item">
+                                    <span class="aw-toggle-item__text">
+                                        <strong>Trạng thái rửa xe</strong>
+                                        <span>Cập nhật khi xe bắt đầu / hoàn thành rửa</span>
+                                    </span>
+                                    <span class="aw-switch">
+                                        <input type="checkbox" name="notifyWashStatus" checked/>
+                                        <span class="aw-switch__slider"></span>
+                                    </span>
+                                </label>
+                                <label class="aw-toggle-item">
+                                    <span class="aw-toggle-item__text">
+                                        <strong>Điểm thưởng</strong>
+                                        <span>Thông báo khi tích điểm hoặc lên hạng</span>
+                                    </span>
+                                    <span class="aw-switch">
+                                        <input type="checkbox" name="notifyLoyalty"/>
+                                        <span class="aw-switch__slider"></span>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="aw-form-actions">
+                                <button type="submit" class="aw-btn aw-btn--primary">
+                                    <i class="bi bi-save"></i> Lưu tùy chọn
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer th:replace="~{fragments/footer :: customer-footer}"></footer>
+    </div>
+</div>
+
+</body>
+</html>
