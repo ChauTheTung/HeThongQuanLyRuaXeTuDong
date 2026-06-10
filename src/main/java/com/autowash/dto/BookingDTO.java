@@ -12,3 +12,4 @@ public class BookingDTO {
     private String status;
     private Double totalPrice;
 }
+

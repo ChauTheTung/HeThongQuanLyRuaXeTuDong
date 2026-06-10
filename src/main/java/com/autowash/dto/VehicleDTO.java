@@ -12,3 +12,4 @@ public class VehicleDTO {
     private String color;
     private String notes;
 }
+
