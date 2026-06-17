@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/customer-head :: customer-head('Quản lý đặt chỗ')}"></head>
+<body class="aw-customer-body">
+<div class="aw-app">
+    <div class="aw-main">
+        <main class="aw-main__content">
+            <section class="aw-card">
+                <div class="aw-page-header">
+                    <div>
+                        <h2>Danh sách đặt chỗ</h2>
+                        <p>Quản lý đặt chỗ của khách hàng và cập nhật trạng thái.</p>
+                    </div>
+                    <form th:action="@{/admin/bookings}" method="get" style="margin-top: 1rem; display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
+                        <input type="text" name="customerQuery" th:value="${customerQuery}" placeholder="Tìm khách hàng theo tên/email/ID" class="aw-input"/>
+                        <select id="status" name="status" class="aw-select">
+                            <option value="" th:selected="${selectedStatus == null}">Tất cả trạng thái</option>
+                            <option th:each="statusOption : ${statusOptions}"
+                                    th:value="${statusOption}"
+                                    th:text="${statusOption}"
+                                    th:selected="${statusOption == selectedStatus}"></option>
+                        </select>
+                        <button type="submit" class="aw-btn aw-btn--secondary">Lọc</button>
+                    </form>
+                </div>
+                <table class="aw-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Khách hàng</th>
+                            <th>Xe</th>
+                            <th>Thời gian</th>
+                            <th>Trạng thái</th>
+                            <th>Giá</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="booking : ${bookings}">
+                            <td th:text="${booking.id}">1</td>
+                            <td th:text="${customerNames[booking.customerId] != null ? customerNames[booking.customerId] : booking.customerId}">1</td>
+                            <td th:text="${booking.vehicleId}">1</td>
+                            <td th:text="${#dates.format(booking.bookingTime, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                            <td th:text="${booking.status}">PENDING</td>
+                            <td th:text="${booking.totalPrice != null ? booking.totalPrice : 0}">0</td>
+                            <td>
+                                <form th:action="@{/admin/bookings/{id}/status(id=${booking.id})}" method="post" style="display:inline-block; margin-right:0.5rem;">
+                                    <select name="status" class="aw-select">
+                                        <option th:selected="${booking.status == 'PENDING'}">PENDING</option>
+                                        <option th:selected="${booking.status == 'CONFIRMED'}">CONFIRMED</option>
+                                        <option th:selected="${booking.status == 'COMPLETED'}">COMPLETED</option>
+                                        <option th:selected="${booking.status == 'CANCELLED'}">CANCELLED</option>
+                                    </select>
+                                    <button type="submit" class="aw-btn aw-btn--ghost">Cập nhật</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${bookings == null or #lists.isEmpty(bookings)}">
+                            <td colspan="7">Không có đặt chỗ nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

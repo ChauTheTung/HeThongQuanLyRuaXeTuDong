@@ -1,7 +1,9 @@
 package com.autowash.controller;
 
+import com.autowash.dto.LoyaltyDTO;
 import com.autowash.entity.Customer;
 import com.autowash.service.CustomerService;
+import com.autowash.service.LoyaltyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +16,9 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-    // Feature 1: View profile (Theo Customer ID hoặc User ID)
+    @Autowired
+    private LoyaltyService loyaltyService;
+
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomerProfile(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.getCustomerById(id));
@@ -25,16 +29,19 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getCustomerByUserId(userId));
     }
 
-    // Feature 2: Update profile
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomerProfile(@PathVariable Long id, @RequestBody Customer customer) {
         return ResponseEntity.ok(customerService.updateProfile(id, customer));
     }
 
-    // Feature 3: View points
     @GetMapping("/{id}/points")
     public ResponseEntity<Integer> getCustomerPoints(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.getLoyaltyPoints(id));
+    }
+
+    @GetMapping("/{id}/loyalty")
+    public ResponseEntity<LoyaltyDTO> getCustomerLoyalty(@PathVariable Long id) {
+        return ResponseEntity.ok(loyaltyService.getLoyaltyInfo(id));
     }
 }
 

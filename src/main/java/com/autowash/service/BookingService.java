@@ -33,7 +33,33 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    public Booking updateBooking(Long id, Booking bookingDetails) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+        booking.setBookingTime(bookingDetails.getBookingTime());
+        booking.setTotalPrice(bookingDetails.getTotalPrice());
+        booking.setStatus(bookingDetails.getStatus() != null ? bookingDetails.getStatus() : booking.getStatus());
+        booking.setUpdatedAt(LocalDateTime.now());
+        return bookingRepository.save(booking);
+    }
+
+    public List<Booking> getBookingsByStatus(String status) {
+        return bookingRepository.findByStatus(status);
+    }
+
     public List<Booking> getBookingsByCustomerId(Long customerId) {
         return bookingRepository.findByCustomerId(customerId);
+    }
+
+    public List<Booking> getBookingsByCustomerIdAndStatus(Long customerId, String status) {
+        return bookingRepository.findByCustomerIdAndStatus(customerId, status);
+    }
+
+    public List<Booking> getBookingsByCustomerIds(List<Long> customerIds) {
+        return bookingRepository.findByCustomerIdIn(customerIds);
+    }
+
+    public List<Booking> getBookingsByCustomerIdsAndStatus(List<Long> customerIds, String status) {
+        return bookingRepository.findByCustomerIdInAndStatus(customerIds, status);
     }
 }

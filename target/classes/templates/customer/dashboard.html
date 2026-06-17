@@ -4,15 +4,48 @@
 <body class="aw-customer-body">
 
 <div class="aw-app">
-    <aside th:replace="~{fragments/sidebar :: customer-sidebar('home', 3)}"></aside>
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('home', notifCount)}"></aside>
 
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(null, null, null, 3, null)}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
 
         <main class="aw-main__content">
-            <!-- Nội dung dashboard khách hàng -->
-            <h2 style="margin:0 0 0.25rem;font-size:1.5rem;">Xin chào, Nguyễn Văn A 👋</h2>
-            <p style="margin:0 0 1.5rem;color:#6b7c93;font-size:0.9rem;">Theo dõi xe, lịch hẹn và ưu đãi của bạn tại đây.</p>
+            <section class="aw-card">
+                <div class="aw-page-header">
+                    <div>
+                        <h2 th:text="'Xin chào, ' + ${profile.fullName} + ' 👋'">Xin chào, Khách hàng</h2>
+                        <p>Quản lý toàn bộ dịch vụ rửa xe, hồ sơ và ưu đãi của bạn.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="aw-card aw-card--grid">
+                <div class="aw-stat-card">
+                    <span class="aw-stat-card__label">Thành viên</span>
+                    <strong class="aw-stat-card__value" th:text="${memberTier}">Bronze</strong>
+                </div>
+                <div class="aw-stat-card">
+                    <span class="aw-stat-card__label">Điểm thưởng</span>
+                    <strong class="aw-stat-card__value" th:text="${loyaltyPoints}">0</strong>
+                </div>
+                <div class="aw-stat-card">
+                    <span class="aw-stat-card__label">Xe đã đăng ký</span>
+                    <strong class="aw-stat-card__value" th:text="${vehicleCount}">0</strong>
+                </div>
+                <div class="aw-stat-card">
+                    <span class="aw-stat-card__label">Lịch sử rửa</span>
+                    <strong class="aw-stat-card__value" th:text="${totalWashes}">0</strong>
+                </div>
+            </section>
+
+            <section class="aw-card">
+                <h3>Trạng thái gần nhất</h3>
+                <p>Truy cập nhanh vào đặt lịch, xe và khuyến mãi hiện tại.</p>
+                <div class="aw-card__footer">
+                    <a th:href="@{/customer/booking}" class="aw-btn aw-btn--primary">Xem đặt lịch</a>
+                    <a th:href="@{/customer/vehicles}" class="aw-btn aw-btn--outline">Quản lý xe</a>
+                </div>
+            </section>
         </main>
 
         <footer th:replace="~{fragments/footer :: customer-footer}"></footer>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/customer-head :: customer-head('Điểm thưởng')}"></head>
+<body class="aw-customer-body">
+<div class="aw-app">
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('loyalty', notifCount)}"></aside>
+    <div class="aw-main">
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <main class="aw-main__content">
+            <section class="aw-card">
+                <div class="aw-page-header">
+                    <div>
+                        <h2>Điểm thưởng của bạn</h2>
+                        <p>Kiểm tra hạng thành viên, số điểm và quy đổi thành ưu đãi.</p>
+                    </div>
+                </div>
+
+                <div class="aw-stat-grid">
+                    <div class="aw-stat-card">
+                        <span class="aw-stat-card__label">Hạng hiện tại</span>
+                        <strong class="aw-stat-card__value" th:text="${loyalty.currentTier}">Bronze</strong>
+                    </div>
+                    <div class="aw-stat-card">
+                        <span class="aw-stat-card__label">Tổng điểm</span>
+                        <strong class="aw-stat-card__value" th:text="${loyalty.loyaltyPoints}">0</strong>
+                    </div>
+                    <div class="aw-stat-card">
+                        <span class="aw-stat-card__label">Điểm cần lên hạng</span>
+                        <strong class="aw-stat-card__value" th:text="${loyalty.nextTierPoints != null ? loyalty.nextTierPoints - loyalty.loyaltyPoints : 0}">0</strong>
+                    </div>
+                </div>
+
+                <div class="aw-alert" th:if="${loyalty.nextTierPoints == null}">
+                    Bạn đang ở hạng cao nhất. Tiếp tục duy trì để nhận ưu đãi đặc biệt.
+                </div>
+            </section>
+
+            <section class="aw-card">
+                <h3>Quy đổi điểm</h3>
+                <form th:action="@{/customer/loyalty/redeem}" method="post" class="aw-form-grid">
+                    <div class="aw-form-group">
+                        <label for="points">Số điểm muốn quy đổi</label>
+                        <input type="number" id="points" name="points" min="1" required placeholder="Nhập số điểm"/>
+                    </div>
+                    <div class="aw-form-group aw-form-group--full">
+                        <label for="description">Mô tả quy đổi</label>
+                        <input type="text" id="description" name="description" placeholder="Ví dụ: Voucher giảm giá"/>
+                    </div>
+                    <div class="aw-form-actions" style="grid-column: 1 / -1;">
+                        <button type="submit" class="aw-btn aw-btn--primary">Quy đổi điểm</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="aw-card">
+                <h3>Thang điểm Loyalty</h3>
+                <p>Đây là các mức thành viên và quyền lợi bạn có thể đạt được.</p>
+                <table class="aw-table">
+                    <thead>
+                        <tr>
+                            <th>Hạng</th>
+                            <th>Từ điểm</th>
+                            <th>Đến điểm</th>
+                            <th>Ưu đãi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="tier : ${tiers}">
+                            <td th:text="${tier.name}">Bronze</td>
+                            <td th:text="${tier.minPoints}">0</td>
+                            <td th:text="${tier.maxPoints}">499</td>
+                            <td th:text="${tier.discountPercent != null ? tier.discountPercent + '%' : 'Không'}">0%</td>
+                        </tr>
+                        <tr th:if="${tiers == null or #lists.isEmpty(tiers)}">
+                            <td colspan="4">Chưa có thang Loyalty nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

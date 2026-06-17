@@ -20,9 +20,19 @@ public class BookingController {
         return bookingService.getAllBookings();
     }
 
+    @GetMapping("/status/{status}")
+    public List<Booking> getBookingsByStatus(@PathVariable String status) {
+        return bookingService.getBookingsByStatus(status);
+    }
+
     @PostMapping
     public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
         return ResponseEntity.ok(bookingService.createBooking(booking));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Booking> updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
+        return ResponseEntity.ok(bookingService.updateBooking(id, booking));
     }
 
     @PutMapping("/{id}/status")

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/customer-head :: customer-head('Đặt lịch')}"></head>
+<body class="aw-customer-body">
+<div class="aw-app">
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('booking', notifCount)}"></aside>
+    <div class="aw-main">
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <main class="aw-main__content">
+            <section class="aw-card">
+                <div class="aw-page-header">
+                    <div>
+                        <h2>Đặt lịch rửa xe</h2>
+                        <p>Chọn xe và đặt lịch nhanh chóng cho lần rửa tiếp theo.</p>
+                    </div>
+                </div>
+                <form th:action="@{/customer/booking}" method="post" th:object="${newBooking}" class="aw-form-grid">
+                    <div class="aw-form-group">
+                        <label for="vehicleId">Chọn xe</label>
+                        <select id="vehicleId" name="vehicleId" required>
+                            <option value="" disabled selected>Chọn xe</option>
+                            <option th:each="vehicle : ${vehicles}"
+                                    th:value="${vehicle.id}"
+                                    th:text="${vehicle.licensePlate} + ' - ' + ${vehicle.brand}"></option>
+                        </select>
+                    </div>
+                    <div class="aw-form-group">
+                        <label for="bookingTime">Thời gian</label>
+                        <input type="datetime-local" id="bookingTime" name="bookingTime" required/>
+                    </div>
+                    <div class="aw-form-group">
+                        <label for="totalPrice">Giá dự kiến (VNĐ)</label>
+                        <input type="number" id="totalPrice" name="totalPrice" min="0" step="1000" placeholder="50000"/>
+                    </div>
+                    <div class="aw-form-actions" style="grid-column: 1 / -1;">
+                        <button type="submit" class="aw-btn aw-btn--primary">Đặt lịch ngay</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="aw-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem;">
+                    <h3>Danh sách lịch đặt</h3>
+                    <form th:action="@{/customer/booking}" method="get" style="display:flex; gap:0.75rem; align-items:center;">
+                        <label for="status">Lọc:</label>
+                        <select id="status" name="status" class="aw-select">
+                            <option value="" th:selected="${selectedStatus == null}">Tất cả</option>
+                            <option th:each="statusOption : ${statusOptions}"
+                                    th:value="${statusOption}"
+                                    th:text="${statusOption}"
+                                    th:selected="${statusOption == selectedStatus}"></option>
+                        </select>
+                        <button type="submit" class="aw-btn aw-btn--secondary">Lọc</button>
+                    </form>
+                </div>
+                <table class="aw-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Xe</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th>Giá</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="booking : ${bookings}">
+                        <td th:text="${booking.id}">1</td>
+                        <td th:text="${booking.vehicleId}">Xe</td>
+                        <td th:text="${#dates.format(booking.bookingTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 09:00</td>
+                        <td th:text="${booking.status}">PENDING</td>
+                        <td th:text="${booking.totalPrice != null ? #numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT') : '0'}">0</td>
+                        <td>
+                            <form th:action="@{/customer/booking/{id}/cancel(id=${booking.id})}" method="post" th:if="${booking.status != 'CANCELLED'}">
+                                <button type="submit" class="aw-btn aw-btn--ghost">Hủy</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${bookings == null or #lists.isEmpty(bookings)}">
+                        <td colspan="6">Chưa có lịch hẹn nào.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>

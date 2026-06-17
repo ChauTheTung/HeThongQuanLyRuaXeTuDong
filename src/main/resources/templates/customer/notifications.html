@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{fragments/customer-head :: customer-head('Thông báo')}"></head>
+<body class="aw-customer-body">
+<div class="aw-app" th:with="notifCount=${notifCount}">
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('notifications', notifCount)}"></aside>
+    <div class="aw-main">
+        <header th:replace="~{fragments/navbar :: customer-navbar(null, null, null, notifCount, null)}"></header>
+        <main class="aw-main__content">
+            <section class="aw-card">
+                <h2>Thông báo của bạn</h2>
+                <p>Bạn chưa có thông báo mới.</p>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>
