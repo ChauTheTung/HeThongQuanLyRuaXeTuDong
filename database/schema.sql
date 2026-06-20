@@ -29,6 +29,10 @@ CREATE TABLE IF NOT EXISTS customers (
     loyalty_points INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    address VARCHAR(255),
+    city VARCHAR(255),
+    date_of_birth DATE,
+    avatar_url VARCHAR(255),
     CONSTRAINT fk_customer_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
