@@ -7,16 +7,16 @@
      th:with="
         fullName=${profile != null && profile.fullName != null ? profile.fullName : 'Nguyễn Văn A'},
         email=${profile != null && profile.email != null ? profile.email : 'nguyenvana@email.com'},
-        phone=${profile != null && profile.phone != null ? profile.phone : '0901 234 567'},
-        address=${profile != null && profile.address != null ? profile.address : '123 Đường Lê Lợi'},
-        city=${profile != null && profile.city != null ? profile.city : 'Quận 1, TP. Hồ Chí Minh'},
-        dateOfBirth=${profile != null && profile.dateOfBirth != null ? profile.dateOfBirth : '1990-05-15'},
+        phone=${profile != null && profile.phoneNumber != null ? profile.phoneNumber : '0901 234 567'},
+        address=${profile != null && profile.address != null ? profile.address : ''},
+        city=${profile != null && profile.city != null ? profile.city : ''},
+        dateOfBirth=${profile != null && profile.dateOfBirth != null ? profile.dateOfBirth : ''},
         avatar=${profile != null && profile.avatarUrl != null ? profile.avatarUrl : 'https://i.pravatar.cc/150?img=12'},
-        tier=${memberTier != null ? memberTier : 'Gold Member'},
-        points=${loyaltyPoints != null ? loyaltyPoints : '1.200'},
-        memberSince=${memberSince != null ? memberSince : '03/2024'},
-        totalWashes=${totalWashes != null ? totalWashes : '28'},
-        notifCount=${notificationCount != null ? notificationCount : 3}
+        tier=${memberTier != null ? memberTier : 'Bronze'},
+        points=${loyaltyPoints != null ? loyaltyPoints : 0},
+        memberSince=${profile != null && profile.createdAt != null ? #temporals.format(profile.createdAt, 'MM/yyyy') : ''},
+        totalWashes=${totalWashes != null ? totalWashes : 0},
+        notifCount=${notifCount != null ? notifCount : 3}
      ">
 
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('profile', ${notifCount})}"></aside>
@@ -92,8 +92,8 @@
                                            th:value="${email}" placeholder="email@example.com" required/>
                                 </div>
                                 <div class="aw-form-group">
-                                    <label for="phone">Số điện thoại</label>
-                                    <input type="tel" id="phone" name="phone"
+                                    <label for="phoneNumber">Số điện thoại</label>
+                                    <input type="tel" id="phoneNumber" name="phoneNumber"
                                            th:value="${phone}" placeholder="090x xxx xxx"/>
                                 </div>
                                 <div class="aw-form-group">

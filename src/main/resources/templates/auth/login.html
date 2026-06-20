@@ -28,12 +28,12 @@
             <a href="#" title="LinkedIn" aria-label="Đăng nhập LinkedIn"><i class="bi bi-linkedin"></i></a>
         </div>
 
-        <p class="auth-divider">hoặc dùng tài khoản email của bạn:</p>
+        <p class="auth-divider">hoặc dùng tài khoản của bạn:</p>
 
         <form class="auth-form" th:action="@{/login}" method="post">
             <div class="auth-field">
-                <i class="bi bi-envelope"></i>
-                <input type="email" name="username" placeholder="Email" required autocomplete="email"/>
+                <i class="bi bi-person"></i>
+                <input type="text" name="username" placeholder="Tên đăng nhập" required autocomplete="username"/>
             </div>
             <div class="auth-field">
                 <i class="bi bi-lock"></i>

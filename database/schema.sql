@@ -11,10 +11,10 @@ CREATE TABLE IF NOT EXISTS users (
 -- 2. Tạo bảng Loyalty Tiers (Lưu hạng thành viên)
 CREATE TABLE IF NOT EXISTS loyalty_tiers (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
+    name VARCHAR(50) NOT NULL UNIQUE,
     min_points INT NOT NULL,
     max_points INT,
-    description VARCHAR(255),
+    discount_percent DOUBLE DEFAULT 0.0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -38,8 +38,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     customer_id BIGINT NOT NULL,
     license_plate VARCHAR(20) NOT NULL UNIQUE,
     brand VARCHAR(50),
-    model VARCHAR(50),
-    vehicle_type VARCHAR(50),
+    vehicle_type VARCHAR(50) NOT NULL,
     color VARCHAR(30),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -50,12 +49,13 @@ CREATE TABLE IF NOT EXISTS vehicles (
 -- 5. Tạo bảng Promotions (Thông tin khuyến mãi)
 CREATE TABLE IF NOT EXISTS promotions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    discount_percent DECIMAL(5,2) NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
+    name VARCHAR(100) NOT NULL,
     description TEXT,
-    is_active BOOLEAN DEFAULT TRUE,
+    tier_name VARCHAR(50),
+    discount_percent DOUBLE,
+    start_date DATETIME,
+    end_date DATETIME,
+    active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

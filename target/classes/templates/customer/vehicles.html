@@ -3,7 +3,7 @@
 <head th:replace="~{fragments/customer-head :: customer-head('Xe của tôi')}"></head>
 <body class="aw-customer-body">
 <div class="aw-app">
-    <aside th:replace="~{fragments/sidebar :: customer-sidebar('vehicles', notifCount)}"></aside>
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('vehicles', ${notifCount})}"></aside>
     <div class="aw-main">
         <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">

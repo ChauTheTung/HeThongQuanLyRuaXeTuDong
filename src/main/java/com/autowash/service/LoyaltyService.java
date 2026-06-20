@@ -34,13 +34,14 @@ public class LoyaltyService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 
-        LoyaltyTier tier = determineTier(customer.getLoyaltyPoints());
+        int points = customer.getLoyaltyPoints() != null ? customer.getLoyaltyPoints() : 0;
+        LoyaltyTier tier = determineTier(points);
         LoyaltyDTO dto = new LoyaltyDTO();
         dto.setCustomerId(customer.getId());
-        dto.setLoyaltyPoints(customer.getLoyaltyPoints());
+        dto.setLoyaltyPoints(points);
         dto.setCurrentTier(tier != null ? tier.getName() : "Bronze");
 
-        loyaltyTierRepository.findFirstByMinPointsGreaterThanOrderByMinPointsAsc(customer.getLoyaltyPoints())
+        loyaltyTierRepository.findFirstByMinPointsGreaterThanOrderByMinPointsAsc(points)
                 .ifPresent(next -> dto.setNextTierPoints(next.getMinPoints()));
 
         return dto;
@@ -133,12 +134,10 @@ public class LoyaltyService {
         if (points == null) {
             return null;
         }
-        Optional<LoyaltyTier> tier = loyaltyTierRepository.findByMinPointsLessThanEqualAndMaxPointsGreaterThanEqual(points, points);
-        if (tier.isPresent()) {
-            return tier.get();
-        }
-        return loyaltyTierRepository.findAll().stream()
-                .min(Comparator.comparing(LoyaltyTier::getMinPoints))
+        List<LoyaltyTier> tiers = loyaltyTierRepository.findAll();
+        return tiers.stream()
+                .filter(t -> points >= t.getMinPoints() && (t.getMaxPoints() == null || points <= t.getMaxPoints()))
+                .max(Comparator.comparing(LoyaltyTier::getMinPoints))
                 .orElse(null);
     }
 }

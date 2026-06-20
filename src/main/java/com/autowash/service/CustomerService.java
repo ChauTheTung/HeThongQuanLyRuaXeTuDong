@@ -34,7 +34,18 @@ public class CustomerService {
     public Customer getCustomerByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + username));
-        return getCustomerByUserId(user.getId());
+        return customerRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    // Tự động tạo customer record nếu chưa có (fix cho tài khoản cũ bị lỗi)
+                    Customer newCustomer = new Customer();
+                    newCustomer.setUserId(user.getId());
+                    newCustomer.setFullName(user.getUsername());
+                    newCustomer.setEmail(user.getUsername());
+                    newCustomer.setLoyaltyPoints(0);
+                    newCustomer.setCreatedAt(java.time.LocalDateTime.now());
+                    newCustomer.setUpdatedAt(java.time.LocalDateTime.now());
+                    return customerRepository.save(newCustomer);
+                });
     }
 
     public List<Customer> getAllCustomers() {
@@ -47,6 +58,12 @@ public class CustomerService {
         existingCustomer.setFullName(updatedData.getFullName());
         existingCustomer.setPhoneNumber(updatedData.getPhoneNumber());
         existingCustomer.setEmail(updatedData.getEmail());
+        existingCustomer.setAddress(updatedData.getAddress());
+        existingCustomer.setCity(updatedData.getCity());
+        existingCustomer.setDateOfBirth(updatedData.getDateOfBirth());
+        if (updatedData.getAvatarUrl() != null && !updatedData.getAvatarUrl().isBlank()) {
+            existingCustomer.setAvatarUrl(updatedData.getAvatarUrl());
+        }
         if (updatedData.getLoyaltyPoints() != null) {
             existingCustomer.setLoyaltyPoints(updatedData.getLoyaltyPoints());
         }

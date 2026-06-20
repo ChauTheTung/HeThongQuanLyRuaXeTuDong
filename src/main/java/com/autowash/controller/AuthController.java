@@ -41,6 +41,7 @@ public class AuthController {
     public String register(
             @RequestParam("fullName") String fullName,
             @RequestParam("email") String email,
+            @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("password") String password,
             RedirectAttributes redirectAttributes
     ) {
@@ -48,6 +49,7 @@ public class AuthController {
         dto.setFullName(fullName);
         dto.setUsername(email);
         dto.setPassword(password);
+        dto.setPhoneNumber(phoneNumber);
 
         String result = authService.register(dto);
         if (result.equals("Tên đăng nhập đã tồn tại!")) {

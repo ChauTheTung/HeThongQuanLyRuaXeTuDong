@@ -51,8 +51,6 @@ public class CustomerPageController {
     public String dashboard(Model model, Authentication authentication) {
         Customer customer = getCurrentCustomer(authentication);
         addCommonProfileAttributes(model, customer);
-        model.addAttribute("vehicleCount", vehicleService.getVehiclesByCustomerId(customer.getId()).size());
-        model.addAttribute("totalWashes", bookingService.getBookingsByCustomerId(customer.getId()).size());
         return "customer/dashboard";
     }
 

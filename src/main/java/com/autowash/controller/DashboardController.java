@@ -13,16 +13,6 @@ public class DashboardController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-        return isAdmin ? "admin/dashboard" : "customer/dashboard";
-    }
-
-    @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
-        return "admin/dashboard";
-    }
-
-    @GetMapping("/customer/dashboard")
-    public String customerDashboard() {
-        return "customer/dashboard";
+        return isAdmin ? "redirect:/admin/dashboard" : "redirect:/customer/dashboard";
     }
 }

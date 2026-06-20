@@ -2,6 +2,7 @@ package com.autowash.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,6 +23,16 @@ public class Customer {
     private String phoneNumber;
 
     private String email;
+
+    private String address;
+
+    private String city;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @Column(name = "loyalty_points")
     private Integer loyaltyPoints = 0;

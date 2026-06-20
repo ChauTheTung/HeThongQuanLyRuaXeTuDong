@@ -19,8 +19,8 @@ public class LoyaltyTier {
     @Column(name = "min_points", nullable = false)
     private Integer minPoints = 0;
 
-    @Column(name = "max_points", nullable = false)
-    private Integer maxPoints = 0;
+    @Column(name = "max_points")
+    private Integer maxPoints;
 
     @Column(name = "discount_percent")
     private Double discountPercent = 0.0;

@@ -3,7 +3,7 @@
 <head th:replace="~{fragments/customer-head :: customer-head('Khuyến mãi')}"></head>
 <body class="aw-customer-body">
 <div class="aw-app" th:with="notifCount=${notifCount}">
-    <aside th:replace="~{fragments/sidebar :: customer-sidebar('promotions', notifCount)}"></aside>
+    <aside th:replace="~{fragments/sidebar :: customer-sidebar('promotions', ${notifCount})}"></aside>
     <div class="aw-main">
         <header th:replace="~{fragments/navbar :: customer-navbar(null, null, null, notifCount, null)}"></header>
         <main class="aw-main__content">
