@@ -5,18 +5,18 @@
 
 <div class="aw-app"
      th:with="
-        fullName=${profile != null && profile.fullName != null ? profile.fullName : 'Nguyễn Văn A'},
-        email=${profile != null && profile.email != null ? profile.email : 'nguyenvana@email.com'},
-        phone=${profile != null && profile.phoneNumber != null ? profile.phoneNumber : '0901 234 567'},
-        address=${profile != null && profile.address != null ? profile.address : ''},
-        city=${profile != null && profile.city != null ? profile.city : ''},
-        dateOfBirth=${profile != null && profile.dateOfBirth != null ? profile.dateOfBirth : ''},
-        avatar=${profile != null && profile.avatarUrl != null ? profile.avatarUrl : 'https://i.pravatar.cc/150?img=12'},
-        tier=${memberTier != null ? memberTier : 'Bronze'},
-        points=${loyaltyPoints != null ? loyaltyPoints : 0},
-        memberSince=${profile != null && profile.createdAt != null ? #temporals.format(profile.createdAt, 'MM/yyyy') : ''},
-        totalWashes=${totalWashes != null ? totalWashes : 0},
-        notifCount=${notifCount != null ? notifCount : 3}
+        fullName=${profile?.fullName ?: 'Nguyễn Văn A'},
+        email=${profile?.email ?: 'nguyenvana@email.com'},
+        phone=${profile?.phoneNumber ?: '0901 234 567'},
+        address=${profile?.address ?: ''},
+        city=${profile?.city ?: ''},
+        dateOfBirth=${profile?.dateOfBirth ?: ''},
+        avatar=${profile?.avatarUrl ?: 'https://i.pravatar.cc/150?img=12'},
+        tier=${memberTier ?: 'Bronze'},
+        points=${loyaltyPoints ?: 0},
+        memberSince=${profile?.createdAt != null ? #temporals.format(profile.createdAt, 'MM/yyyy') : ''},
+        totalWashes=${totalWashes ?: 0},
+        notifCount=${notifCount ?: 3}
      ">
 
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('profile', ${notifCount})}"></aside>
@@ -110,6 +110,11 @@
                                     <label for="city">Tỉnh / Thành phố</label>
                                     <input type="text" id="city" name="city"
                                            th:value="${city}" placeholder="Quận, thành phố"/>
+                                </div>
+                                <div class="aw-form-group aw-form-group--full">
+                                    <label for="avatarUrl">Link ảnh đại diện (URL)</label>
+                                    <input type="url" id="avatarUrl" name="avatarUrl"
+                                           th:value="${avatar}" placeholder="https://example.com/avatar.jpg"/>
                                 </div>
                             </div>
                             <div class="aw-form-actions">

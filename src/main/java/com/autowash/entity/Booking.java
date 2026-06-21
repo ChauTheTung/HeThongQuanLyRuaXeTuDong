@@ -18,6 +18,9 @@ public class Booking {
     @Column(name = "vehicle_id", nullable = false)
     private Long vehicleId;
 
+    @Column(name = "service_name")
+    private String serviceName;
+
     @Column(name = "booking_time", nullable = false)
     private LocalDateTime bookingTime;
 

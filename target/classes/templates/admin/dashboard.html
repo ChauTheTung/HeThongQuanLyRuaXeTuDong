@@ -1,48 +1,370 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
-<head th:replace="~{fragments/customer-head :: customer-head('Quản trị hệ thống')}"></head>
-<body class="aw-customer-body">
-<div class="aw-app">
-    <div class="aw-main">
-        <main class="aw-main__content">
-            <section class="aw-card">
-                <div class="aw-card__header">
-                    <h2>Bảng điều khiển Admin</h2>
-                    <p>Thông tin tổng quan về doanh thu, đặt chỗ và khách hàng.</p>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản trị hệ thống | AUTO WASH</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        :root {
+            --ad-primary: #0f172a;
+            --ad-sidebar: #1e293b;
+            --ad-accent: #3b82f6;
+            --ad-accent2: #8b5cf6;
+            --ad-green: #10b981;
+            --ad-orange: #f59e0b;
+            --ad-red: #ef4444;
+            --ad-bg: #f1f5f9;
+            --ad-white: #ffffff;
+            --ad-border: #e2e8f0;
+            --ad-text: #1e293b;
+            --ad-muted: #64748b;
+            --ad-shadow: 0 4px 24px rgba(15,23,42,0.07);
+            --ad-radius: 14px;
+            --ad-sidebar-w: 240px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--ad-bg); color: var(--ad-text); min-height: 100vh; display: flex; }
+
+        /* ── Sidebar ── */
+        .ad-sidebar {
+            width: var(--ad-sidebar-w);
+            min-width: var(--ad-sidebar-w);
+            background: var(--ad-sidebar);
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 200;
+            overflow-y: auto;
+            padding: 1.5rem 1rem 1rem;
+        }
+        .ad-sidebar__brand {
+            display: flex; align-items: center; gap: .75rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            margin-bottom: 1.25rem;
+        }
+        .ad-sidebar__logo {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--ad-accent), var(--ad-accent2));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: white; flex-shrink: 0;
+        }
+        .ad-sidebar__name { font-size: .95rem; font-weight: 800; color: white; line-height: 1.2; }
+        .ad-sidebar__role { font-size: .68rem; color: #94a3b8; margin-top: .15rem; }
+        .ad-nav { display: flex; flex-direction: column; gap: .2rem; flex: 1; }
+        .ad-nav__label {
+            font-size: .65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .1em; color: #475569; padding: .75rem .75rem .3rem; margin-top: .5rem;
+        }
+        .ad-nav__link {
+            display: flex; align-items: center; gap: .65rem;
+            padding: .6rem .85rem; border-radius: 10px;
+            color: #94a3b8; text-decoration: none; font-size: .83rem; font-weight: 500;
+            transition: all .15s;
+        }
+        .ad-nav__link i { font-size: 1rem; width: 1.1rem; text-align: center; }
+        .ad-nav__link:hover { background: rgba(255,255,255,.06); color: white; }
+        .ad-nav__link--active { background: var(--ad-accent); color: white; box-shadow: 0 4px 14px rgba(59,130,246,.3); }
+        .ad-nav__link--logout { margin-top: auto; color: #f87171; }
+        .ad-nav__link--logout:hover { background: rgba(239,68,68,.12); color: #fca5a5; }
+
+        /* ── Main ── */
+        .ad-main { flex: 1; margin-left: var(--ad-sidebar-w); display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ── Topbar ── */
+        .ad-topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.1rem 2rem;
+            background: var(--ad-white);
+            border-bottom: 1px solid var(--ad-border);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .ad-topbar__title { font-size: 1.05rem; font-weight: 700; color: var(--ad-text); }
+        .ad-topbar__breadcrumb { font-size: .78rem; color: var(--ad-muted); margin-top: .1rem; }
+        .ad-topbar__right { display: flex; align-items: center; gap: 1rem; }
+        .ad-admin-badge {
+            display: flex; align-items: center; gap: .5rem;
+            background: linear-gradient(135deg, #0f172a, #1e3a5f);
+            color: white; padding: .45rem 1rem; border-radius: 999px;
+            font-size: .8rem; font-weight: 600;
+        }
+        .ad-admin-badge i { color: #fbbf24; }
+
+        /* ── Content ── */
+        .ad-content { padding: 2rem; flex: 1; }
+
+        /* ── Stat Grid ── */
+        .ad-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .ad-stat {
+            background: var(--ad-white);
+            border-radius: var(--ad-radius);
+            padding: 1.35rem 1.5rem;
+            box-shadow: var(--ad-shadow);
+            display: flex; align-items: flex-start; justify-content: space-between;
+            border: 1px solid var(--ad-border);
+            position: relative; overflow: hidden;
+            transition: transform .15s, box-shadow .15s;
+        }
+        .ad-stat:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(15,23,42,.1); }
+        .ad-stat__body { flex: 1; }
+        .ad-stat__label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--ad-muted); margin-bottom: .5rem; }
+        .ad-stat__value { font-size: 1.9rem; font-weight: 800; color: var(--ad-text); line-height: 1; margin-bottom: .4rem; }
+        .ad-stat__sub { font-size: .75rem; color: var(--ad-muted); }
+        .ad-stat__icon {
+            width: 52px; height: 52px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; flex-shrink: 0;
+        }
+        .ad-stat__icon--blue { background: #eff6ff; color: var(--ad-accent); }
+        .ad-stat__icon--green { background: #f0fdf4; color: var(--ad-green); }
+        .ad-stat__icon--orange { background: #fffbeb; color: var(--ad-orange); }
+        .ad-stat__icon--purple { background: #f5f3ff; color: var(--ad-accent2); }
+        .ad-stat__bar {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+        }
+        .ad-stat__bar--blue { background: linear-gradient(90deg, var(--ad-accent), #93c5fd); }
+        .ad-stat__bar--green { background: linear-gradient(90deg, var(--ad-green), #6ee7b7); }
+        .ad-stat__bar--orange { background: linear-gradient(90deg, var(--ad-orange), #fcd34d); }
+        .ad-stat__bar--purple { background: linear-gradient(90deg, var(--ad-accent2), #c4b5fd); }
+
+        /* ── Section Row ── */
+        .ad-row { display: grid; grid-template-columns: 1fr 340px; gap: 1.25rem; margin-bottom: 1.25rem; }
+
+        /* ── Card ── */
+        .ad-card {
+            background: var(--ad-white);
+            border-radius: var(--ad-radius);
+            box-shadow: var(--ad-shadow);
+            border: 1px solid var(--ad-border);
+            overflow: hidden;
+        }
+        .ad-card__head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--ad-border);
+        }
+        .ad-card__title { font-size: .9rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+        .ad-card__title i { color: var(--ad-accent); }
+        .ad-card__body { padding: 1.25rem 1.5rem; }
+        .ad-card__link { font-size: .78rem; color: var(--ad-accent); text-decoration: none; font-weight: 600; }
+        .ad-card__link:hover { text-decoration: underline; }
+
+        /* ── Booking Stats ── */
+        .ad-booking-stat { display: flex; align-items: center; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid var(--ad-border); }
+        .ad-booking-stat:last-child { border-bottom: none; padding-bottom: 0; }
+        .ad-booking-stat__dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .ad-booking-stat__label { flex: 1; font-size: .85rem; color: var(--ad-text); font-weight: 500; }
+        .ad-booking-stat__count { font-size: .9rem; font-weight: 700; color: var(--ad-text); }
+        .ad-booking-stat__bar-wrap { flex: 2; height: 6px; background: var(--ad-bg); border-radius: 999px; overflow: hidden; }
+        .ad-booking-stat__bar-fill { height: 100%; border-radius: 999px; }
+
+        /* ── Quick Links ── */
+        .ad-quick-links { display: flex; flex-direction: column; gap: .6rem; }
+        .ad-quick-link {
+            display: flex; align-items: center; gap: .85rem;
+            padding: .75rem 1rem; border-radius: 10px;
+            background: var(--ad-bg); text-decoration: none; color: var(--ad-text);
+            font-size: .85rem; font-weight: 500;
+            transition: all .15s;
+            border: 1px solid transparent;
+        }
+        .ad-quick-link:hover { background: #eff6ff; border-color: #bfdbfe; color: var(--ad-accent); }
+        .ad-quick-link__icon {
+            width: 36px; height: 36px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0;
+        }
+        .ad-quick-link__icon--blue { background: #eff6ff; color: var(--ad-accent); }
+        .ad-quick-link__icon--green { background: #f0fdf4; color: var(--ad-green); }
+        .ad-quick-link__icon--purple { background: #f5f3ff; color: var(--ad-accent2); }
+        .ad-quick-link__icon--orange { background: #fffbeb; color: var(--ad-orange); }
+        .ad-quick-link i.bi-chevron-right { margin-left: auto; font-size: .75rem; color: var(--ad-muted); }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="ad-sidebar">
+    <div class="ad-sidebar__brand">
+        <div class="ad-sidebar__logo"><i class="bi bi-droplet-fill"></i></div>
+        <div>
+            <div class="ad-sidebar__name">AUTO WASH</div>
+            <div class="ad-sidebar__role">Quản trị viên</div>
+        </div>
+    </div>
+    <nav class="ad-nav">
+        <span class="ad-nav__label">Tổng quan</span>
+        <a href="/admin/dashboard" class="ad-nav__link ad-nav__link--active">
+            <i class="bi bi-grid-1x2"></i> Bảng điều khiển
+        </a>
+
+        <span class="ad-nav__label">Quản lý</span>
+        <a href="/admin/bookings" class="ad-nav__link"><i class="bi bi-calendar-check"></i> Đặt lịch</a>
+        <a href="/admin/services" class="ad-nav__link"><i class="bi bi-tools"></i> Dịch vụ & Giá</a>
+        <a href="/admin/customers" class="ad-nav__link">
+            <i class="bi bi-people"></i> Khách hàng
+        </a>
+        <a href="/admin/promotions" class="ad-nav__link">
+            <i class="bi bi-tag"></i> Khuyến mãi
+        </a>
+        <a href="/admin/loyalty" class="ad-nav__link">
+            <i class="bi bi-star"></i> Hạng Loyalty
+        </a>
+
+        <span class="ad-nav__label">Hệ thống</span>
+        <a href="/admin/reports" class="ad-nav__link">
+            <i class="bi bi-bar-chart"></i> Báo cáo
+        </a>
+        <a href="/logout" class="ad-nav__link ad-nav__link--logout" style="margin-top:1rem;">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+        </a>
+    </nav>
+</aside>
+
+<!-- Main -->
+<div class="ad-main">
+    <!-- Topbar -->
+    <div class="ad-topbar">
+        <div>
+            <div class="ad-topbar__title">Bảng điều khiển</div>
+            <div class="ad-topbar__breadcrumb">Admin / Dashboard</div>
+        </div>
+        <div class="ad-topbar__right">
+            <div class="ad-admin-badge"><i class="bi bi-shield-fill-check"></i> Admin</div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="ad-content">
+
+        <!-- Stat Cards -->
+        <div class="ad-stat-grid">
+            <div class="ad-stat">
+                <div class="ad-stat__body">
+                    <div class="ad-stat__label">Tổng doanh thu</div>
+                    <div class="ad-stat__value"
+                         th:text="${summary.totalRevenue != null ? #numbers.formatDecimal(summary.totalRevenue, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">0 ₫</div>
+                    <div class="ad-stat__sub">Từ tất cả đơn hoàn thành</div>
                 </div>
-                <div class="aw-card__body">
-                    <div>
-                        <strong>Tổng doanh thu:</strong>
-                        <span th:text="${summary.totalRevenue} ?: 0">0</span>
+                <div class="ad-stat__icon ad-stat__icon--blue"><i class="bi bi-currency-dollar"></i></div>
+                <div class="ad-stat__bar ad-stat__bar--blue"></div>
+            </div>
+            <div class="ad-stat">
+                <div class="ad-stat__body">
+                    <div class="ad-stat__label">Đơn hoàn thành</div>
+                    <div class="ad-stat__value" th:text="${summary.completedBookings ?: 0}">0</div>
+                    <div class="ad-stat__sub">Lịch rửa đã xong</div>
+                </div>
+                <div class="ad-stat__icon ad-stat__icon--green"><i class="bi bi-check2-circle"></i></div>
+                <div class="ad-stat__bar ad-stat__bar--green"></div>
+            </div>
+            <div class="ad-stat">
+                <div class="ad-stat__body">
+                    <div class="ad-stat__label">Đang chờ xử lý</div>
+                    <div class="ad-stat__value" th:text="${summary.pendingBookings ?: 0}">0</div>
+                    <div class="ad-stat__sub">Cần xác nhận</div>
+                </div>
+                <div class="ad-stat__icon ad-stat__icon--orange"><i class="bi bi-hourglass-split"></i></div>
+                <div class="ad-stat__bar ad-stat__bar--orange"></div>
+            </div>
+            <div class="ad-stat">
+                <div class="ad-stat__body">
+                    <div class="ad-stat__label">Tổng khách hàng</div>
+                    <div class="ad-stat__value" th:text="${customerStats.totalCustomers ?: 0}">0</div>
+                    <div class="ad-stat__sub">Tài khoản đã đăng ký</div>
+                </div>
+                <div class="ad-stat__icon ad-stat__icon--purple"><i class="bi bi-people"></i></div>
+                <div class="ad-stat__bar ad-stat__bar--purple"></div>
+            </div>
+        </div>
+
+        <!-- Row: Booking Stats + Quick Links -->
+        <div class="ad-row">
+            <!-- Booking breakdown -->
+            <div class="ad-card">
+                <div class="ad-card__head">
+                    <div class="ad-card__title"><i class="bi bi-pie-chart"></i> Thống kê trạng thái đặt lịch</div>
+                    <a href="/admin/bookings" class="ad-card__link">Xem tất cả →</a>
+                </div>
+                <div class="ad-card__body">
+                    <div th:each="entry : ${bookingStats}" class="ad-booking-stat">
+                        <span class="ad-booking-stat__dot"
+                              th:style="${entry.key == 'PENDING'   ? 'background:#f59e0b' :
+                                          entry.key == 'CONFIRMED' ? 'background:#3b82f6' :
+                                          entry.key == 'COMPLETED' ? 'background:#10b981' :
+                                                                     'background:#94a3b8'}"></span>
+                        <span class="ad-booking-stat__label"
+                              th:text="${entry.key == 'PENDING'   ? 'Chờ xác nhận' :
+                                         entry.key == 'CONFIRMED' ? 'Đã xác nhận' :
+                                         entry.key == 'COMPLETED' ? 'Hoàn thành' :
+                                         entry.key == 'CANCELLED' ? 'Đã hủy' : entry.key}">
+                            Trạng thái
+                        </span>
+                        <div class="ad-booking-stat__bar-wrap">
+                            <div class="ad-booking-stat__bar-fill"
+                                 th:style="${'width:' + (entry.value * 100 / (summary.completedBookings + summary.pendingBookings + 10)) + '%;background:' +
+                                            (entry.key == 'PENDING'   ? '#f59e0b' :
+                                             entry.key == 'CONFIRMED' ? '#3b82f6' :
+                                             entry.key == 'COMPLETED' ? '#10b981' : '#94a3b8')}">
+                            </div>
+                        </div>
+                        <span class="ad-booking-stat__count" th:text="${entry.value}">0</span>
                     </div>
-                    <div>
-                        <strong>Đặt chỗ hoàn thành:</strong>
-                        <span th:text="${summary.completedBookings} ?: 0">0</span>
-                    </div>
-                    <div>
-                        <strong>Đặt chỗ đang chờ:</strong>
-                        <span th:text="${summary.pendingBookings} ?: 0">0</span>
-                    </div>
-                    <div>
-                        <strong>Khách hàng:</strong>
-                        <span th:text="${summary.totalCustomers} ?: 0">0</span>
+                    <div th:if="${bookingStats == null or bookingStats.isEmpty()}" style="color:#94a3b8;font-size:.85rem;padding:1rem 0;">
+                        Chưa có dữ liệu đặt lịch.
                     </div>
                 </div>
-            </section>
-            <section class="aw-card">
-                <h3>Thống kê đặt chỗ</h3>
-                <ul>
-                    <li th:each="entry : ${bookingStats}">
-                        <strong th:text="${entry.key}"></strong>: <span th:text="${entry.value}">0</span>
-                    </li>
-                </ul>
-            </section>
-            <section class="aw-card">
-                <h3>Khách hàng</h3>
-                <p><strong>Tổng khách hàng:</strong> <span th:text="${customerStats.totalCustomers}">0</span></p>
-            </section>
-        </main>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="ad-card">
+                <div class="ad-card__head">
+                    <div class="ad-card__title"><i class="bi bi-lightning"></i> Truy cập nhanh</div>
+                </div>
+                <div class="ad-card__body">
+                    <div class="ad-quick-links">
+                        <a href="/admin/bookings" class="ad-quick-link">
+                            <div class="ad-quick-link__icon ad-quick-link__icon--blue"><i class="bi bi-calendar-check"></i></div>
+                            Quản lý đặt lịch
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="/admin/customers" class="ad-quick-link">
+                            <div class="ad-quick-link__icon ad-quick-link__icon--green"><i class="bi bi-people"></i></div>
+                            Danh sách khách hàng
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="/admin/promotions" class="ad-quick-link">
+                            <div class="ad-quick-link__icon ad-quick-link__icon--orange"><i class="bi bi-tag"></i></div>
+                            Quản lý khuyến mãi
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="/admin/loyalty" class="ad-quick-link">
+                            <div class="ad-quick-link__icon ad-quick-link__icon--purple"><i class="bi bi-star"></i></div>
+                            Hạng Loyalty
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a href="/admin/reports" class="ad-quick-link">
+                            <div class="ad-quick-link__icon ad-quick-link__icon--blue"><i class="bi bi-bar-chart"></i></div>
+                            Báo cáo & Thống kê
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
+
 </body>
 </html>

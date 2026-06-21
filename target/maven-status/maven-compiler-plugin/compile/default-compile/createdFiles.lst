@@ -1,0 +1,3 @@
+com\autowash\entity\ServicePricing.class
+com\autowash\repository\ServicePricingRepository.class
+com\autowash\service\PricingService.class

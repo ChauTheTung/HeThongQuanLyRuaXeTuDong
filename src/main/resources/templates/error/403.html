@@ -27,7 +27,9 @@
             font-weight: 700;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            color: transparent;
             line-height: 1;
         }
         h1 { font-size: 1.5rem; margin: 1rem 0 0.5rem; color: #f1f5f9; }
@@ -61,13 +63,13 @@
 <body>
 <div class="error-box">
     <div class="error-code">403</div>
-    <h1>Không tìm thấy hồ sơ</h1>
+    <h1>Không có quyền truy cập</h1>
     <div class="alert" th:if="${errorMessage}" th:text="${errorMessage}">
-        Tài khoản này chưa có hồ sơ khách hàng.
+        Bạn không có quyền truy cập vào trang này.
     </div>
-    <p>Tài khoản của bạn chưa được liên kết với hồ sơ khách hàng. Vui lòng đăng xuất rồi đăng ký tài khoản mới.</p>
-    <a href="/logout" class="btn">Đăng xuất</a>
-    <a href="/register" class="btn btn-outline">Đăng ký tài khoản mới</a>
+    <p>Tài khoản của bạn không có đủ quyền hạn để xem nội dung này. Vui lòng quay lại trang chủ hoặc đăng nhập với tài khoản có quyền.</p>
+    <a href="/dashboard" class="btn">Về trang chủ</a>
+    <a href="/logout" class="btn btn-outline">Đăng xuất</a>
 </div>
 </body>
 </html>
