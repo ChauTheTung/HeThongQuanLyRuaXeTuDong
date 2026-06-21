@@ -4,11 +4,13 @@ import com.autowash.entity.Booking;
 import com.autowash.entity.Customer;
 import com.autowash.entity.LoyaltyTier;
 import com.autowash.entity.Promotion;
+import com.autowash.entity.ServicePricing;
 import com.autowash.service.BookingService;
 import com.autowash.service.CustomerService;
 import com.autowash.service.DashboardService;
 import com.autowash.service.LoyaltyService;
 import com.autowash.service.PromotionService;
+import com.autowash.service.PricingService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -31,17 +34,20 @@ public class AdminPageController {
     private final CustomerService customerService;
     private final PromotionService promotionService;
     private final LoyaltyService loyaltyService;
+    private final PricingService pricingService;
 
     public AdminPageController(DashboardService dashboardService,
                                BookingService bookingService,
                                CustomerService customerService,
                                PromotionService promotionService,
-                               LoyaltyService loyaltyService) {
+                               LoyaltyService loyaltyService,
+                               PricingService pricingService) {
         this.dashboardService = dashboardService;
         this.bookingService = bookingService;
         this.customerService = customerService;
         this.promotionService = promotionService;
         this.loyaltyService = loyaltyService;
+        this.pricingService = pricingService;
     }
 
     @GetMapping("/dashboard")
@@ -78,7 +84,17 @@ public class AdminPageController {
         Map<Long, String> customerNames = bookings.stream()
                 .map(Booking::getCustomerId)
                 .distinct()
-                .collect(Collectors.toMap(id -> id, customerId -> customerService.getCustomerById(customerId).getFullName()));
+                .collect(Collectors.toMap(
+                        id -> id, 
+                        customerId -> {
+                            try {
+                                Customer c = customerService.getCustomerById(customerId);
+                                return c.getFullName();
+                            } catch (Exception e) {
+                                return "Khách ẩn danh";
+                            }
+                        }
+                ));
 
         model.addAttribute("bookings", bookings);
         model.addAttribute("customerNames", customerNames);
@@ -94,6 +110,13 @@ public class AdminPageController {
                                       RedirectAttributes redirectAttributes) {
         bookingService.updateBookingStatus(id, status);
         redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái đặt chỗ thành công.");
+        return "redirect:/admin/bookings";
+    }
+
+    @PostMapping("/bookings/{id}/delete")
+    public String deleteBooking(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        bookingService.deleteBooking(id);
+        redirectAttributes.addFlashAttribute("success", "Đã xóa lịch đặt #" + id + " thành công.");
         return "redirect:/admin/bookings";
     }
 
@@ -185,5 +208,26 @@ public class AdminPageController {
         model.addAttribute("summary", dashboardService.getRevenueSummary());
         model.addAttribute("bookingStats", dashboardService.getBookingStatistics());
         return "admin/reports";
+    }
+
+    @GetMapping("/services")
+    public String services(Model model) {
+        model.addAttribute("services", pricingService.getAllServices());
+        model.addAttribute("newService", new ServicePricing());
+        return "admin/services";
+    }
+
+    @PostMapping("/services")
+    public String saveService(@ModelAttribute ServicePricing service, RedirectAttributes redirectAttributes) {
+        pricingService.saveService(service);
+        redirectAttributes.addFlashAttribute("success", "Lưu dịch vụ thành công.");
+        return "redirect:/admin/services";
+    }
+
+    @PostMapping("/services/{id}/delete")
+    public String deleteService(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        pricingService.deleteService(id);
+        redirectAttributes.addFlashAttribute("success", "Xóa dịch vụ thành công.");
+        return "redirect:/admin/services";
     }
 }

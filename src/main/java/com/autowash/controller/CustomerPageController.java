@@ -9,6 +9,7 @@ import com.autowash.service.CustomerService;
 import com.autowash.service.LoyaltyService;
 import com.autowash.service.PromotionService;
 import com.autowash.service.VehicleService;
+import com.autowash.service.PricingService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,19 +33,22 @@ public class CustomerPageController {
     private final LoyaltyService loyaltyService;
     private final PromotionService promotionService;
     private final AuthService authService;
+    private final PricingService pricingService;
 
     public CustomerPageController(CustomerService customerService,
                                   BookingService bookingService,
                                   VehicleService vehicleService,
                                   LoyaltyService loyaltyService,
                                   PromotionService promotionService,
-                                  AuthService authService) {
+                                  AuthService authService,
+                                  PricingService pricingService) {
         this.customerService = customerService;
         this.bookingService = bookingService;
         this.vehicleService = vehicleService;
         this.loyaltyService = loyaltyService;
         this.promotionService = promotionService;
         this.authService = authService;
+        this.pricingService = pricingService;
     }
 
     @GetMapping("/dashboard")
@@ -63,6 +67,7 @@ public class CustomerPageController {
                 ? bookingService.getBookingsByCustomerIdAndStatus(customer.getId(), status)
                 : bookingService.getBookingsByCustomerId(customer.getId()));
         model.addAttribute("vehicles", vehicleService.getVehiclesByCustomerId(customer.getId()));
+        model.addAttribute("servicesList", pricingService.getAllServices());
         model.addAttribute("newBooking", new Booking());
         model.addAttribute("statusOptions", List.of("PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"));
         model.addAttribute("selectedStatus", status);
@@ -75,6 +80,20 @@ public class CustomerPageController {
         Customer customer = getCurrentCustomer(authentication);
         booking.setCustomerId(customer.getId());
         booking.setStatus("PENDING");
+        
+        // Tính toán lại giá dựa trên Dịch vụ và Loại xe để tránh gian lận
+        if (booking.getVehicleId() != null && booking.getServiceName() != null) {
+            Vehicle vehicle = vehicleService.getVehiclesByCustomerId(customer.getId()).stream()
+                    .filter(v -> v.getId().equals(booking.getVehicleId()))
+                    .findFirst().orElse(null);
+            if (vehicle != null) {
+                pricingService.getServicesByVehicleType(vehicle.getVehicleType()).stream()
+                        .filter(s -> s.getServiceName().equals(booking.getServiceName()))
+                        .findFirst()
+                        .ifPresent(service -> booking.setTotalPrice(service.getPrice()));
+            }
+        }
+        
         bookingService.createBooking(booking);
         redirectAttributes.addFlashAttribute("success", "Đặt lịch rửa xe thành công.");
         return "redirect:/customer/booking";
@@ -101,8 +120,14 @@ public class CustomerPageController {
     public String addVehicle(@ModelAttribute Vehicle vehicle, Authentication authentication, RedirectAttributes redirectAttributes) {
         Customer customer = getCurrentCustomer(authentication);
         vehicle.setCustomerId(customer.getId());
-        vehicleService.saveVehicle(vehicle);
-        redirectAttributes.addFlashAttribute("success", "Thêm xe mới thành công.");
+        try {
+            vehicleService.saveVehicle(vehicle);
+            redirectAttributes.addFlashAttribute("success", "Thêm xe mới thành công.");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            redirectAttributes.addFlashAttribute("error", "Biển số xe này đã được đăng ký trên hệ thống!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi thêm xe. Vui lòng thử lại.");
+        }
         return "redirect:/customer/vehicles";
     }
 

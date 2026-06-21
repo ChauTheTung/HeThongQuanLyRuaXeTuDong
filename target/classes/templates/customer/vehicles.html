@@ -11,6 +11,13 @@
                 <div>
                     <h2>Xe của tôi</h2>
                     <p>Quản lý xe đã đăng ký và thêm xe mới cho dịch vụ.</p>
+                    
+                    <div th:if="${success}" style="background:#d1fae5; color:#065f46; padding:0.75rem 1rem; border-radius:8px; margin-top:1rem; font-size:0.9rem;">
+                        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+                    </div>
+                    <div th:if="${error}" style="background:#fee2e2; color:#991b1b; padding:0.75rem 1rem; border-radius:8px; margin-top:1rem; font-size:0.9rem;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+                    </div>
                 </div>
                 <div>
                     <form th:action="@{/customer/vehicles}" method="post" th:object="${newVehicle}" class="aw-form-grid">
@@ -20,7 +27,12 @@
                         </div>
                         <div class="aw-form-group">
                             <label for="vehicleType">Loại xe</label>
-                            <input type="text" id="vehicleType" name="vehicleType" placeholder="Sedan / SUV" required/>
+                            <select id="vehicleType" name="vehicleType" required class="aw-input" style="padding: 0.6rem; border-radius: 8px; border: 1px solid var(--aw-border);">
+                                <option value="Sedan">Sedan (Ô tô 4-5 chỗ)</option>
+                                <option value="SUV">SUV (Ô tô 7 chỗ)</option>
+                                <option value="Pickup">Pickup (Bán tải)</option>
+                                <option value="Xe máy">Xe máy</option>
+                            </select>
                         </div>
                         <div class="aw-form-group">
                             <label for="brand">Thương hiệu</label>
@@ -46,22 +58,23 @@
                 <table class="aw-table">
                     <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Biển số</th>
                         <th>Loại xe</th>
                         <th>Thương hiệu</th>
+                        <th>Màu sắc</th>
                         <th>Hành động</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="vehicle : ${vehicles}">
-                        <td th:text="${vehicle.id}">1</td>
                         <td th:text="${vehicle.licensePlate}">ABC-123</td>
                         <td th:text="${vehicle.vehicleType}">Sedan</td>
                         <td th:text="${vehicle.brand}">Toyota</td>
+                        <td th:text="${vehicle.color != null ? vehicle.color : '—'}">Trắng</td>
                         <td>
-                            <form th:action="@{/customer/vehicles/{id}/delete(id=${vehicle.id})}" method="post">
-                                <button type="submit" class="aw-btn aw-btn--ghost">Xóa</button>
+                            <form th:action="@{/customer/vehicles/{id}/delete(id=${vehicle.id})}" method="post"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa xe này không?')">
+                                <button type="submit" class="aw-btn--cancel-sm"><i class="bi bi-trash"></i> Xóa</button>
                             </form>
                         </td>
                     </tr>

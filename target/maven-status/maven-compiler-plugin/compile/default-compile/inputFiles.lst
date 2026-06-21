@@ -24,6 +24,7 @@ D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\Customer.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\LoyaltyTier.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\PointTransaction.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\Promotion.java
+D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\ServicePricing.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\User.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\Vehicle.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\entity\WashHistory.java
@@ -34,6 +35,7 @@ D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\CustomerReposi
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\LoyaltyTierRepository.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\PointTransactionRepository.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\PromotionRepository.java
+D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\ServicePricingRepository.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\UserRepository.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\VehicleRepository.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\repository\WashHistoryRepository.java
@@ -45,6 +47,7 @@ D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\CustomerService.j
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\CustomUserDetailsService.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\DashboardService.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\LoyaltyService.java
+D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\PricingService.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\PromotionService.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\SchedulerService.java
 D:\HeThongQuanLyRuaXeTuDong\src\main\java\com\autowash\service\VehicleService.java

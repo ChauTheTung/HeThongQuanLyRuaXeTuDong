@@ -27,25 +27,30 @@ public class CustomerService {
     }
 
     public Customer getCustomerByUserId(Long userId) {
-        return customerRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng liên kết với User ID: " + userId));
+        List<Customer> customers = customerRepository.findByUserId(userId);
+        if (customers.isEmpty()) {
+            throw new ResourceNotFoundException("Không tìm thấy khách hàng liên kết với User ID: " + userId);
+        }
+        return customers.get(customers.size() - 1);
     }
 
     public Customer getCustomerByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + username));
-        return customerRepository.findByUserId(user.getId())
-                .orElseGet(() -> {
-                    // Tự động tạo customer record nếu chưa có (fix cho tài khoản cũ bị lỗi)
-                    Customer newCustomer = new Customer();
-                    newCustomer.setUserId(user.getId());
-                    newCustomer.setFullName(user.getUsername());
-                    newCustomer.setEmail(user.getUsername());
-                    newCustomer.setLoyaltyPoints(0);
-                    newCustomer.setCreatedAt(java.time.LocalDateTime.now());
-                    newCustomer.setUpdatedAt(java.time.LocalDateTime.now());
-                    return customerRepository.save(newCustomer);
-                });
+        List<Customer> customers = customerRepository.findByUserId(user.getId());
+        if (!customers.isEmpty()) {
+            return customers.get(customers.size() - 1);
+        } else {
+            // Tự động tạo customer record nếu chưa có (fix cho tài khoản cũ bị lỗi)
+            Customer newCustomer = new Customer();
+            newCustomer.setUserId(user.getId());
+            newCustomer.setFullName(user.getUsername());
+            newCustomer.setEmail(user.getUsername());
+            newCustomer.setLoyaltyPoints(0);
+            newCustomer.setCreatedAt(java.time.LocalDateTime.now());
+            newCustomer.setUpdatedAt(java.time.LocalDateTime.now());
+            return customerRepository.save(newCustomer);
+        }
     }
 
     public List<Customer> getAllCustomers() {

@@ -7,84 +7,213 @@
     <div class="aw-main">
         <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
-            <section class="aw-card">
-                <div class="aw-page-header">
-                    <div>
-                        <h2>Đặt lịch rửa xe</h2>
-                        <p>Chọn xe và đặt lịch nhanh chóng cho lần rửa tiếp theo.</p>
-                    </div>
+
+            <!-- Page Header -->
+            <div class="aw-page-header">
+                <div>
+                    <h2><i class="bi bi-calendar-check" style="color:var(--aw-accent);margin-right:.5rem;"></i>Đặt lịch rửa xe</h2>
+                    <p>Chọn xe và đặt lịch nhanh chóng cho lần rửa tiếp theo.</p>
                 </div>
-                <form th:action="@{/customer/booking}" method="post" th:object="${newBooking}" class="aw-form-grid">
+            </div>
+
+            <!-- Flash messages -->
+            <div th:if="${success}" class="aw-alert aw-alert--success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${success}">Thành công</span>
+            </div>
+            <div th:if="${error}" class="aw-alert aw-alert--error">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${error}">Lỗi</span>
+            </div>
+
+            <!-- Booking Form -->
+            <section class="aw-card aw-booking-form-card">
+                <h3 class="aw-card__title"><i class="bi bi-plus-circle"></i> Tạo lịch hẹn mới</h3>
+                <form th:action="@{/customer/booking}" method="post" th:object="${newBooking}" class="aw-booking-form">
                     <div class="aw-form-group">
-                        <label for="vehicleId">Chọn xe</label>
+                        <label for="vehicleId"><i class="bi bi-car-front"></i> Chọn xe</label>
                         <select id="vehicleId" name="vehicleId" required>
-                            <option value="" disabled selected>Chọn xe</option>
+                            <option value="" disabled selected>-- Chọn xe của bạn --</option>
                             <option th:each="vehicle : ${vehicles}"
                                     th:value="${vehicle.id}"
-                                    th:text="${vehicle.licensePlate} + ' - ' + ${vehicle.brand}"></option>
+                                    th:text="${vehicle.licensePlate + ' — ' + vehicle.brand + (vehicle.color != null ? ' (' + vehicle.color + ')' : '')}"></option>
                         </select>
+                        <span class="aw-form-hint" th:if="${vehicles == null or #lists.isEmpty(vehicles)}">
+                            <i class="bi bi-info-circle"></i>
+                            Bạn chưa có xe nào. <a th:href="@{/customer/vehicles}">Thêm xe ngay</a>
+                        </span>
                     </div>
                     <div class="aw-form-group">
-                        <label for="bookingTime">Thời gian</label>
+                        <label for="bookingTime"><i class="bi bi-clock"></i> Thời gian hẹn</label>
                         <input type="datetime-local" id="bookingTime" name="bookingTime" required/>
                     </div>
                     <div class="aw-form-group">
-                        <label for="totalPrice">Giá dự kiến (VNĐ)</label>
-                        <input type="number" id="totalPrice" name="totalPrice" min="0" step="1000" placeholder="50000"/>
+                        <label for="serviceName"><i class="bi bi-tools"></i> Dịch vụ</label>
+                        <select id="serviceName" name="serviceName" required class="aw-input">
+                            <option value="" disabled selected>-- Chọn xe trước --</option>
+                        </select>
                     </div>
-                    <div class="aw-form-actions" style="grid-column: 1 / -1;">
-                        <button type="submit" class="aw-btn aw-btn--primary">Đặt lịch ngay</button>
+                    <div class="aw-form-group">
+                        <label><i class="bi bi-tag"></i> Giá tiền</label>
+                        <div id="priceDisplay" style="font-weight:700; font-size:1.2rem; color:var(--aw-primary); padding-top: 0.5rem;">0 ₫</div>
+                    </div>
+                    <div class="aw-booking-form__actions">
+                        <button type="submit" class="aw-btn aw-btn--primary aw-btn--lg">
+                            <i class="bi bi-calendar-plus"></i>
+                            Đặt lịch ngay
+                        </button>
                     </div>
                 </form>
             </section>
 
-            <section class="aw-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem;">
-                    <h3>Danh sách lịch đặt</h3>
-                    <form th:action="@{/customer/booking}" method="get" style="display:flex; gap:0.75rem; align-items:center;">
-                        <label for="status">Lọc:</label>
-                        <select id="status" name="status" class="aw-select">
-                            <option value="" th:selected="${selectedStatus == null}">Tất cả</option>
-                            <option th:each="statusOption : ${statusOptions}"
-                                    th:value="${statusOption}"
-                                    th:text="${statusOption}"
-                                    th:selected="${statusOption == selectedStatus}"></option>
-                        </select>
-                        <button type="submit" class="aw-btn aw-btn--secondary">Lọc</button>
-                    </form>
+            <!-- Booking List -->
+            <section class="aw-card" style="margin-top:1.25rem;">
+                <div class="aw-booking-list-header">
+                    <div>
+                        <h3 class="aw-card__title" style="margin-bottom:.25rem;"><i class="bi bi-list-ul"></i> Danh sách lịch đặt</h3>
+                        <p class="aw-text-muted" style="font-size:.8rem;margin:0;">
+                            Tổng cộng <strong th:text="${bookings != null ? #lists.size(bookings) : 0}">0</strong> lịch hẹn
+                        </p>
+                    </div>
                 </div>
-                <table class="aw-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Xe</th>
-                        <th>Thời gian</th>
-                        <th>Trạng thái</th>
-                        <th>Giá</th>
-                        <th>Hành động</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="booking : ${bookings}">
-                        <td th:text="${booking.id}">1</td>
-                        <td th:text="${booking.vehicleId}">Xe</td>
-                        <td th:text="${#dates.format(booking.bookingTime, 'dd/MM/yyyy HH:mm')}">01/01/2026 09:00</td>
-                        <td th:text="${booking.status}">PENDING</td>
-                        <td th:text="${booking.totalPrice != null ? #numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT') : '0'}">0</td>
-                        <td>
-                            <form th:action="@{/customer/booking/{id}/cancel(id=${booking.id})}" method="post" th:if="${booking.status != 'CANCELLED'}">
-                                <button type="submit" class="aw-btn aw-btn--ghost">Hủy</button>
+
+                <!-- Filter Tabs -->
+                <div class="aw-filter-tabs">
+                    <a th:href="@{/customer/booking}"
+                       th:classappend="${selectedStatus == null or selectedStatus == '' ? ' aw-filter-tab--active' : ''}"
+                       class="aw-filter-tab">
+                        <i class="bi bi-grid-3x3-gap"></i> Tất cả
+                    </a>
+                    <a th:href="@{/customer/booking(status='PENDING')}"
+                       th:classappend="${selectedStatus == 'PENDING' ? ' aw-filter-tab--active' : ''}"
+                       class="aw-filter-tab aw-filter-tab--pending">
+                        <i class="bi bi-hourglass-split"></i> Chờ xác nhận
+                    </a>
+                    <a th:href="@{/customer/booking(status='CONFIRMED')}"
+                       th:classappend="${selectedStatus == 'CONFIRMED' ? ' aw-filter-tab--active' : ''}"
+                       class="aw-filter-tab aw-filter-tab--confirmed">
+                        <i class="bi bi-check-circle"></i> Đã xác nhận
+                    </a>
+                    <a th:href="@{/customer/booking(status='COMPLETED')}"
+                       th:classappend="${selectedStatus == 'COMPLETED' ? ' aw-filter-tab--active' : ''}"
+                       class="aw-filter-tab aw-filter-tab--completed">
+                        <i class="bi bi-check2-all"></i> Hoàn thành
+                    </a>
+                    <a th:href="@{/customer/booking(status='CANCELLED')}"
+                       th:classappend="${selectedStatus == 'CANCELLED' ? ' aw-filter-tab--active' : ''}"
+                       class="aw-filter-tab aw-filter-tab--cancelled">
+                        <i class="bi bi-x-circle"></i> Đã hủy
+                    </a>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${bookings == null or #lists.isEmpty(bookings)}" class="aw-empty-state">
+                    <div class="aw-empty-state__icon">
+                        <i class="bi bi-calendar-x"></i>
+                    </div>
+                    <h4>Chưa có lịch hẹn nào</h4>
+                    <p>Đặt lịch rửa xe ngay để bắt đầu sử dụng dịch vụ.</p>
+                </div>
+
+                <!-- Booking Cards -->
+                <div th:if="${bookings != null and !#lists.isEmpty(bookings)}" class="aw-booking-cards">
+                    <div th:each="booking : ${bookings}" class="aw-booking-item">
+                        <div class="aw-booking-item__left">
+                            <div class="aw-booking-item__id">#<span th:text="${booking.id}">1</span></div>
+                            <div class="aw-booking-item__icon">
+                                <i class="bi bi-car-front-fill"></i>
+                            </div>
+                        </div>
+                        <div class="aw-booking-item__body">
+                            <div class="aw-booking-item__row">
+                                <span class="aw-booking-item__label">
+                                    <i class="bi bi-car-front"></i> Xe #<span th:text="${booking.vehicleId}">1</span>
+                                </span>
+                                <span th:text="'₫' + ${booking.totalPrice != null ? #numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT') : '0'}"
+                                      class="aw-booking-item__price">₫0</span>
+                            </div>
+                            <div class="aw-booking-item__time">
+                                <i class="bi bi-clock"></i>
+                                <span th:text="${#temporals.format(booking.bookingTime, 'HH:mm – dd/MM/yyyy')}">09:00 – 15/01/2024</span>
+                            </div>
+                        </div>
+                        <div class="aw-booking-item__right">
+                            <span th:class="${'aw-badge aw-badge--' + #strings.toLowerCase(booking.status)}"
+                                  th:text="${booking.status == 'PENDING' ? 'Chờ xác nhận' :
+                                             booking.status == 'CONFIRMED' ? 'Đã xác nhận' :
+                                             booking.status == 'COMPLETED' ? 'Hoàn thành' :
+                                             booking.status == 'CANCELLED' ? 'Đã hủy' :
+                                             booking.status}">Trạng thái</span>
+                            <form th:action="@{/customer/booking/{id}/cancel(id=${booking.id})}"
+                                  method="post"
+                                  th:if="${booking.status == 'PENDING' or booking.status == 'CONFIRMED'}"
+                                  onsubmit="return confirm('Bạn có chắc muốn hủy lịch này không?')">
+                                <button type="submit" class="aw-btn aw-btn--cancel-sm">
+                                    <i class="bi bi-x-lg"></i> Hủy
+                                </button>
                             </form>
-                        </td>
-                    </tr>
-                    <tr th:if="${bookings == null or #lists.isEmpty(bookings)}">
-                        <td colspan="6">Chưa có lịch hẹn nào.</td>
-                    </tr>
-                    </tbody>
-                </table>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
+        <footer th:replace="~{fragments/footer :: customer-footer}"></footer>
     </div>
 </div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+document.addEventListener('DOMContentLoaded', function() {
+    const vehicles = /*[[${vehicles}]]*/ [];
+    const services = /*[[${servicesList}]]*/ [];
+    
+    const vehicleSelect = document.getElementById('vehicleId');
+    const serviceSelect = document.getElementById('serviceName');
+    const priceDisplay = document.getElementById('priceDisplay');
+    
+    function updateServices() {
+        const vehicleId = vehicleSelect.value;
+        serviceSelect.innerHTML = '<option value="" disabled selected>-- Chọn dịch vụ --</option>';
+        priceDisplay.innerText = '0 ₫';
+        
+        if (!vehicleId) return;
+        
+        const vehicle = vehicles.find(v => v.id == vehicleId);
+        if (!vehicle) return;
+        
+        const vehicleType = vehicle.vehicleType;
+        const availableServices = services.filter(s => s.vehicleType === vehicleType);
+        
+        availableServices.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.serviceName;
+            opt.text = s.serviceName;
+            opt.dataset.price = s.price;
+            serviceSelect.appendChild(opt);
+        });
+    }
+    
+    function updatePrice() {
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        if (selectedOption && selectedOption.dataset.price) {
+            const price = parseFloat(selectedOption.dataset.price);
+            priceDisplay.innerText = new Intl.NumberFormat('vi-VN').format(price) + ' ₫';
+        } else {
+            priceDisplay.innerText = '0 ₫';
+        }
+    }
+    
+    if(vehicleSelect && serviceSelect) {
+        vehicleSelect.addEventListener('change', updateServices);
+        serviceSelect.addEventListener('change', updatePrice);
+        // Kích hoạt ngay nếu đã có xe được chọn (ví dụ: reload form báo lỗi)
+        if (vehicleSelect.value) {
+            updateServices();
+        }
+    }
+});
+/*]]>*/
+</script>
+
 </body>
 </html>
