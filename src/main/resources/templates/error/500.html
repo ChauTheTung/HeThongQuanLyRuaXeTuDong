@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Lỗi hệ thống | AUTO WASH</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        .error-box {
+            text-align: center;
+            padding: 3rem 2rem;
+            max-width: 480px;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            line-height: 1;
+        }
+        h1 { font-size: 1.5rem; margin: 1rem 0 0.5rem; color: #f1f5f9; }
+        p  { color: #94a3b8; margin-bottom: 2rem; }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0.4rem;
+        }
+    </style>
+</head>
+<body>
+<div class="error-box">
+    <div class="error-code">500</div>
+    <h1>Lỗi máy chủ</h1>
+    <p>Rất xin lỗi, hệ thống đang gặp sự cố nội bộ. Vui lòng gửi mã lỗi dưới đây cho quản trị viên.</p>
+    <div style="text-align: left; background: #1e293b; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.85rem; color: #f87171; overflow-x: auto; margin-bottom: 2rem;">
+        <strong>Error:</strong> <span th:text="${error}">N/A</span><br/>
+        <strong>Message:</strong> <span th:text="${message}">N/A</span><br/>
+        <strong>Path:</strong> <span th:text="${path}">N/A</span>
+    </div>
+    <a href="/dashboard" class="btn">Về trang chủ</a>
+</div>
+</body>
+</html>

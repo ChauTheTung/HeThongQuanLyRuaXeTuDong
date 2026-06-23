@@ -62,4 +62,8 @@ public class BookingService {
     public List<Booking> getBookingsByCustomerIdsAndStatus(List<Long> customerIds, String status) {
         return bookingRepository.findByCustomerIdInAndStatus(customerIds, status);
     }
-}
+
+    public void deleteBooking(Long id) {
+        bookingRepository.deleteById(id);
+    }
+}

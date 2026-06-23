@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản lý Dịch vụ & Giá | AUTO WASH</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        :root {
+            --ad-primary:#0f172a;--ad-sidebar:#1e293b;--ad-accent:#3b82f6;--ad-accent2:#8b5cf6;
+            --ad-green:#10b981;--ad-orange:#f59e0b;--ad-red:#ef4444;
+            --ad-bg:#f1f5f9;--ad-white:#fff;--ad-border:#e2e8f0;--ad-text:#1e293b;
+            --ad-muted:#64748b;--ad-shadow:0 4px 24px rgba(15,23,42,.07);
+            --ad-radius:14px;--ad-sidebar-w:240px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--ad-bg);color:var(--ad-text);min-height:100vh;display:flex;}
+        /* Sidebar */
+        .ad-sidebar{width:var(--ad-sidebar-w);min-width:var(--ad-sidebar-w);background:var(--ad-sidebar);color:#e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;overflow-y:auto;padding:1.5rem 1rem 1rem;}
+        .ad-sidebar__brand{display:flex;align-items:center;gap:.75rem;padding-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:1.25rem;}
+        .ad-sidebar__logo{width:40px;height:40px;background:linear-gradient(135deg,var(--ad-accent),var(--ad-accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:white;flex-shrink:0;}
+        .ad-sidebar__name{font-size:.95rem;font-weight:800;color:white;line-height:1.2;}
+        .ad-sidebar__role{font-size:.68rem;color:#94a3b8;margin-top:.15rem;}
+        .ad-nav{display:flex;flex-direction:column;gap:.2rem;flex:1;}
+        .ad-nav__label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#475569;padding:.75rem .75rem .3rem;margin-top:.5rem;}
+        .ad-nav__link{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;border-radius:10px;color:#94a3b8;text-decoration:none;font-size:.83rem;font-weight:500;transition:all .15s;}
+        .ad-nav__link i{font-size:1rem;width:1.1rem;text-align:center;}
+        .ad-nav__link:hover{background:rgba(255,255,255,.06);color:white;}
+        .ad-nav__link--active{background:var(--ad-accent);color:white;box-shadow:0 4px 14px rgba(59,130,246,.3);}
+        .ad-nav__link--logout{margin-top:auto;color:#f87171;}
+        /* Main */
+        .ad-main{flex:1;margin-left:var(--ad-sidebar-w);display:flex;flex-direction:column;min-height:100vh;}
+        .ad-topbar{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 2rem;background:var(--ad-white);border-bottom:1px solid var(--ad-border);position:sticky;top:0;z-index:100;}
+        .ad-topbar__title{font-size:1.05rem;font-weight:700;}
+        .ad-topbar__breadcrumb{font-size:.78rem;color:var(--ad-muted);margin-top:.1rem;}
+        .ad-admin-badge{display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;padding:.45rem 1rem;border-radius:999px;font-size:.8rem;font-weight:600;}
+        .ad-admin-badge i{color:#fbbf24;}
+        .ad-content{padding:2rem;flex:1;display:grid;grid-template-columns:1fr 340px;gap:1.5rem;}
+        /* Card */
+        .ad-card{background:var(--ad-white);border-radius:var(--ad-radius);box-shadow:var(--ad-shadow);border:1px solid var(--ad-border);overflow:hidden;align-self:start;}
+        .ad-card__head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid var(--ad-border);}
+        .ad-card__title{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:.5rem;}
+        .ad-card__title i{color:var(--ad-accent);}
+        .ad-card__body{padding:1.25rem 1.5rem;}
+        /* Buttons */
+        .ad-btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.65rem 1.25rem;border-radius:10px;font-family:inherit;font-size:.85rem;font-weight:600;border:none;cursor:pointer;text-decoration:none;transition:all .15s;}
+        .ad-btn--primary{background:var(--ad-accent);color:white;}
+        .ad-btn--primary:hover{background:#2563eb;}
+        .ad-btn--danger{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;}
+        .ad-btn--danger:hover{background:#fee2e2;border-color:#f87171;}
+        .ad-btn--sm{padding:.35rem .75rem;font-size:.75rem;border-radius:8px;}
+        /* Table */
+        .ad-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+        .ad-table thead tr{background:#f8fafc;}
+        .ad-table th{padding:.85rem 1.25rem;text-align:left;font-size:.75rem;font-weight:700;color:var(--ad-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid var(--ad-border);}
+        .ad-table td{padding:1rem 1.25rem;border-bottom:1px solid #f1f5f9;color:var(--ad-text);vertical-align:middle;}
+        .ad-table tbody tr:hover td{background:#f8faff;}
+        /* Form */
+        .ad-form-group{margin-bottom:1rem;}
+        .ad-form-group label{display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:var(--ad-text);}
+        .ad-input{width:100%;padding:.6rem 1rem;border:1.5px solid var(--ad-border);border-radius:10px;font-family:inherit;font-size:.875rem;color:var(--ad-text);background:var(--ad-white);outline:none;transition:border-color .2s;}
+        .ad-input:focus{border-color:var(--ad-accent);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+        .ad-select{width:100%;padding:.6rem 1rem;border:1.5px solid var(--ad-border);border-radius:10px;font-family:inherit;font-size:.875rem;color:var(--ad-text);background:var(--ad-white);outline:none;cursor:pointer;}
+        .ad-select:focus{border-color:var(--ad-accent);}
+        /* Flash */
+        .ad-flash{display:flex;align-items:center;gap:.65rem;padding:.85rem 1.1rem;border-radius:10px;font-size:.875rem;font-weight:500;margin-bottom:1.25rem;grid-column:1 / -1;}
+        .ad-flash--success{background:#f0fdf4;color:#15803d;border-left:4px solid #22c55e;}
+        /* Badges */
+        .ad-badge{display:inline-block;padding:.2rem .6rem;border-radius:6px;font-size:.7rem;font-weight:600;}
+        .ad-badge--oto{background:#eff6ff;color:#1d4ed8;}
+        .ad-badge--xemay{background:#f5f3ff;color:#6d28d9;}
+        @media(max-width:1024px){.ad-content{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="ad-sidebar">
+    <div class="ad-sidebar__brand">
+        <div class="ad-sidebar__logo"><i class="bi bi-droplet-fill"></i></div>
+        <div><div class="ad-sidebar__name">AUTO WASH</div><div class="ad-sidebar__role">Quản trị viên</div></div>
+    </div>
+    <nav class="ad-nav">
+        <span class="ad-nav__label">Tổng quan</span>
+        <a href="/admin/dashboard" class="ad-nav__link"><i class="bi bi-grid-1x2"></i> Bảng điều khiển</a>
+        <span class="ad-nav__label">Quản lý</span>
+        <a href="/admin/bookings" class="ad-nav__link"><i class="bi bi-calendar-check"></i> Đặt lịch</a>
+        <a href="/admin/services" class="ad-nav__link ad-nav__link--active"><i class="bi bi-tools"></i> Dịch vụ & Giá</a>
+        <a href="/admin/customers" class="ad-nav__link"><i class="bi bi-people"></i> Khách hàng</a>
+        <a href="/admin/promotions" class="ad-nav__link"><i class="bi bi-tag"></i> Khuyến mãi</a>
+        <a href="/admin/loyalty" class="ad-nav__link"><i class="bi bi-star"></i> Hạng Loyalty</a>
+        <span class="ad-nav__label">Hệ thống</span>
+        <a href="/admin/reports" class="ad-nav__link"><i class="bi bi-bar-chart"></i> Báo cáo</a>
+        <a href="/logout" class="ad-nav__link ad-nav__link--logout" style="margin-top:1rem;"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+    </nav>
+</aside>
+
+<div class="ad-main">
+    <div class="ad-topbar">
+        <div>
+            <div class="ad-topbar__title"><i class="bi bi-tools" style="color:var(--ad-accent);margin-right:.4rem;"></i>Quản lý Dịch vụ & Giá</div>
+            <div class="ad-topbar__breadcrumb">Admin / Dịch vụ</div>
+        </div>
+        <div class="ad-admin-badge"><i class="bi bi-shield-fill-check"></i> Admin</div>
+    </div>
+
+    <div class="ad-content">
+        <div th:if="${success}" class="ad-flash ad-flash--success"><i class="bi bi-check-circle-fill"></i><span th:text="${success}"></span></div>
+
+        <!-- Bảng danh sách -->
+        <div class="ad-card">
+            <div class="ad-card__head">
+                <div class="ad-card__title"><i class="bi bi-list-ul"></i> Bảng giá dịch vụ</div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="ad-table">
+                    <thead>
+                        <tr>
+                            <th>Tên Dịch Vụ</th>
+                            <th>Loại Xe</th>
+                            <th>Mô Tả</th>
+                            <th>Giá Tiền</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="s : ${services}">
+                            <td><strong th:text="${s.serviceName}">Rửa xe</strong></td>
+                            <td>
+                                <span th:class="${s.vehicleType == 'Ô tô' ? 'ad-badge ad-badge--oto' : 'ad-badge ad-badge--xemay'}" 
+                                      th:text="${s.vehicleType}">Ô tô</span>
+                            </td>
+                            <td th:text="${s.description}">Mô tả</td>
+                            <td style="font-weight:700;color:var(--ad-primary);" 
+                                th:text="${#numbers.formatDecimal(s.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">100.000 ₫</td>
+                            <td>
+                                <form th:action="@{/admin/services/{id}/delete(id=${s.id})}" method="post" 
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa dịch vụ này?');">
+                                    <button type="submit" class="ad-btn ad-btn--danger ad-btn--sm"><i class="bi bi-trash"></i> Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${services == null or #lists.isEmpty(services)}">
+                            <td colspan="5" style="text-align:center;padding:2rem;color:var(--ad-muted);">Chưa có dịch vụ nào được cấu hình.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Form thêm mới -->
+        <div class="ad-card">
+            <div class="ad-card__head">
+                <div class="ad-card__title"><i class="bi bi-plus-circle"></i> Thêm Dịch vụ mới</div>
+            </div>
+            <div class="ad-card__body">
+                <form th:action="@{/admin/services}" th:object="${newService}" method="post">
+                    <div class="ad-form-group">
+                        <label>Tên Dịch vụ</label>
+                        <input type="text" th:field="*{serviceName}" class="ad-input" placeholder="VD: Rửa xe, Thay nhớt..." required/>
+                    </div>
+                    <div class="aw-form-group">
+                        <label>Loại Xe</label>
+                        <select th:field="*{vehicleType}" class="ad-select" required>
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Pickup">Pickup</option>
+                            <option value="Xe máy">Xe máy</option>
+                        </select>
+                    </div>
+                    <div class="ad-form-group">
+                        <label>Giá tiền (VNĐ)</label>
+                        <input type="number" th:field="*{price}" class="ad-input" placeholder="VD: 150000" min="0" required/>
+                    </div>
+                    <div class="ad-form-group">
+                        <label>Mô tả (tùy chọn)</label>
+                        <textarea th:field="*{description}" class="ad-input" rows="3" placeholder="Ghi chú thêm..."></textarea>
+                    </div>
+                    <button type="submit" class="ad-btn ad-btn--primary" style="width:100%;">
+                        <i class="bi bi-save"></i> Lưu Dịch vụ
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

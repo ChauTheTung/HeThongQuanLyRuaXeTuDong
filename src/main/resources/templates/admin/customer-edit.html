@@ -31,11 +31,11 @@
                     </div>
                     <div class="aw-form-group">
                         <label for="createdAt">Tạo lúc</label>
-                        <input id="createdAt" type="text" th:value="${#dates.format(customer.createdAt, 'dd/MM/yyyy HH:mm')}" readonly/>
+                        <input id="createdAt" type="text" th:value="${#temporals.format(customer.createdAt, 'dd/MM/yyyy HH:mm')}" readonly/>
                     </div>
                     <div class="aw-form-group">
                         <label for="updatedAt">Cập nhật</label>
-                        <input id="updatedAt" type="text" th:value="${#dates.format(customer.updatedAt, 'dd/MM/yyyy HH:mm')}" readonly/>
+                        <input id="updatedAt" type="text" th:value="${#temporals.format(customer.updatedAt, 'dd/MM/yyyy HH:mm')}" readonly/>
                     </div>
                     <div class="aw-form-actions" style="grid-column: 1 / -1; display:flex; gap:1rem; flex-wrap:wrap;">
                         <button type="submit" class="aw-btn aw-btn--primary">Lưu thay đổi</button>

@@ -1,67 +1,242 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
-<head th:replace="~{fragments/customer-head :: customer-head('Quản lý đặt chỗ')}"></head>
-<body class="aw-customer-body">
-<div class="aw-app">
-    <div class="aw-main">
-        <main class="aw-main__content">
-            <section class="aw-card">
-                <div class="aw-page-header">
-                    <div>
-                        <h2>Danh sách đặt chỗ</h2>
-                        <p>Quản lý đặt chỗ của khách hàng và cập nhật trạng thái.</p>
-                    </div>
-                    <form th:action="@{/admin/bookings}" method="get" style="margin-top: 1rem; display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
-                        <input type="text" name="customerQuery" th:value="${customerQuery}" placeholder="Tìm khách hàng theo tên/email/ID" class="aw-input"/>
-                        <select id="status" name="status" class="aw-select">
-                            <option value="" th:selected="${selectedStatus == null}">Tất cả trạng thái</option>
-                            <option th:each="statusOption : ${statusOptions}"
-                                    th:value="${statusOption}"
-                                    th:text="${statusOption}"
-                                    th:selected="${statusOption == selectedStatus}"></option>
-                        </select>
-                        <button type="submit" class="aw-btn aw-btn--secondary">Lọc</button>
-                    </form>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản lý đặt lịch | AUTO WASH</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <style>
+        :root {
+            --ad-primary:#0f172a;--ad-sidebar:#1e293b;--ad-accent:#3b82f6;--ad-accent2:#8b5cf6;
+            --ad-green:#10b981;--ad-orange:#f59e0b;--ad-red:#ef4444;
+            --ad-bg:#f1f5f9;--ad-white:#fff;--ad-border:#e2e8f0;--ad-text:#1e293b;
+            --ad-muted:#64748b;--ad-shadow:0 4px 24px rgba(15,23,42,.07);
+            --ad-radius:14px;--ad-sidebar-w:240px;
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--ad-bg);color:var(--ad-text);min-height:100vh;display:flex;}
+        /* Sidebar */
+        .ad-sidebar{width:var(--ad-sidebar-w);min-width:var(--ad-sidebar-w);background:var(--ad-sidebar);color:#e2e8f0;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:200;overflow-y:auto;padding:1.5rem 1rem 1rem;}
+        .ad-sidebar__brand{display:flex;align-items:center;gap:.75rem;padding-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:1.25rem;}
+        .ad-sidebar__logo{width:40px;height:40px;background:linear-gradient(135deg,var(--ad-accent),var(--ad-accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:white;flex-shrink:0;}
+        .ad-sidebar__name{font-size:.95rem;font-weight:800;color:white;line-height:1.2;}
+        .ad-sidebar__role{font-size:.68rem;color:#94a3b8;margin-top:.15rem;}
+        .ad-nav{display:flex;flex-direction:column;gap:.2rem;flex:1;}
+        .ad-nav__label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#475569;padding:.75rem .75rem .3rem;margin-top:.5rem;}
+        .ad-nav__link{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;border-radius:10px;color:#94a3b8;text-decoration:none;font-size:.83rem;font-weight:500;transition:all .15s;}
+        .ad-nav__link i{font-size:1rem;width:1.1rem;text-align:center;}
+        .ad-nav__link:hover{background:rgba(255,255,255,.06);color:white;}
+        .ad-nav__link--active{background:var(--ad-accent);color:white;box-shadow:0 4px 14px rgba(59,130,246,.3);}
+        .ad-nav__link--logout{margin-top:auto;color:#f87171;}
+        .ad-nav__link--logout:hover{background:rgba(239,68,68,.12);color:#fca5a5;}
+        /* Main */
+        .ad-main{flex:1;margin-left:var(--ad-sidebar-w);display:flex;flex-direction:column;min-height:100vh;}
+        .ad-topbar{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 2rem;background:var(--ad-white);border-bottom:1px solid var(--ad-border);position:sticky;top:0;z-index:100;}
+        .ad-topbar__title{font-size:1.05rem;font-weight:700;}
+        .ad-topbar__breadcrumb{font-size:.78rem;color:var(--ad-muted);margin-top:.1rem;}
+        .ad-admin-badge{display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;padding:.45rem 1rem;border-radius:999px;font-size:.8rem;font-weight:600;}
+        .ad-admin-badge i{color:#fbbf24;}
+        .ad-content{padding:2rem;flex:1;}
+        /* Card */
+        .ad-card{background:var(--ad-white);border-radius:var(--ad-radius);box-shadow:var(--ad-shadow);border:1px solid var(--ad-border);}
+        .ad-card__head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.5rem;border-bottom:1px solid var(--ad-border);flex-wrap:wrap;gap:.75rem;}
+        .ad-card__title{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:.5rem;}
+        .ad-card__title i{color:var(--ad-accent);}
+        .ad-card__body{padding:1.25rem 1.5rem;}
+        /* Filter Bar */
+        .ad-filter-bar{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;}
+        .ad-input{padding:.6rem 1rem;border:1.5px solid var(--ad-border);border-radius:10px;font-family:inherit;font-size:.875rem;color:var(--ad-text);background:var(--ad-white);outline:none;transition:border-color .2s,box-shadow .2s;min-width:240px;}
+        .ad-input:focus{border-color:var(--ad-accent);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+        .ad-select{padding:.6rem 1rem;border:1.5px solid var(--ad-border);border-radius:10px;font-family:inherit;font-size:.875rem;color:var(--ad-text);background:var(--ad-white);outline:none;cursor:pointer;transition:border-color .2s;}
+        .ad-select:focus{border-color:var(--ad-accent);}
+        .ad-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.1rem;border-radius:10px;font-family:inherit;font-size:.82rem;font-weight:600;border:none;cursor:pointer;text-decoration:none;transition:all .15s;}
+        .ad-btn--primary{background:var(--ad-accent);color:white;}
+        .ad-btn--primary:hover{background:#2563eb;}
+        .ad-btn--ghost{background:var(--ad-bg);color:var(--ad-muted);border:1px solid var(--ad-border);}
+        .ad-btn--ghost:hover{background:var(--ad-border);color:var(--ad-text);}
+        .ad-btn--danger{background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;}
+        .ad-btn--danger:hover{background:#fee2e2;border-color:#f87171;}
+        .ad-btn--sm{padding:.35rem .75rem;font-size:.75rem;border-radius:8px;}
+        /* Table */
+        .ad-table{width:100%;border-collapse:collapse;font-size:.84rem;}
+        .ad-table thead tr{background:#f8fafc;}
+        .ad-table th{padding:.85rem 1rem;text-align:left;font-size:.72rem;font-weight:700;color:var(--ad-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid var(--ad-border);}
+        .ad-table td{padding:.9rem 1rem;border-bottom:1px solid #f1f5f9;color:var(--ad-text);vertical-align:middle;}
+        .ad-table tbody tr:last-child td{border-bottom:none;}
+        .ad-table tbody tr:hover td{background:#f8faff;}
+        /* Badges */
+        .ad-badge{display:inline-flex;align-items:center;padding:.28rem .75rem;border-radius:999px;font-size:.72rem;font-weight:700;white-space:nowrap;}
+        .ad-badge--pending{background:#fff3e0;color:#c2410c;border:1px solid #fdba74;}
+        .ad-badge--confirmed{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd;}
+        .ad-badge--completed{background:#f0fdf4;color:#15803d;border:1px solid #86efac;}
+        .ad-badge--cancelled{background:#f9fafb;color:#6b7280;border:1px solid #d1d5db;text-decoration:line-through;opacity:.8;}
+        /* Actions cell */
+        .ad-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+        /* Stats row */
+        .ad-stats-row{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+        .ad-mini-stat{background:var(--ad-white);border:1px solid var(--ad-border);border-radius:12px;padding:.85rem 1.1rem;flex:1;min-width:130px;box-shadow:var(--ad-shadow);}
+        .ad-mini-stat__label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ad-muted);margin-bottom:.3rem;}
+        .ad-mini-stat__value{font-size:1.4rem;font-weight:800;color:var(--ad-text);}
+        /* Empty */
+        .ad-empty{text-align:center;padding:3rem 1rem;color:var(--ad-muted);}
+        .ad-empty i{font-size:3rem;opacity:.3;display:block;margin-bottom:.75rem;}
+        /* Status select in table */
+        .ad-status-select{padding:.3rem .6rem;border:1.5px solid var(--ad-border);border-radius:8px;font-size:.75rem;font-family:inherit;color:var(--ad-text);background:var(--ad-white);cursor:pointer;}
+        .ad-status-select:focus{outline:none;border-color:var(--ad-accent);}
+        /* Flash */
+        .ad-flash{display:flex;align-items:center;gap:.65rem;padding:.85rem 1.1rem;border-radius:10px;font-size:.875rem;font-weight:500;margin-bottom:1.25rem;}
+        .ad-flash--success{background:#f0fdf4;color:#15803d;border-left:4px solid #22c55e;}
+        .ad-flash--error{background:#fef2f2;color:#dc2626;border-left:4px solid #ef4444;}
+        /* Price formatting */
+        .ad-price{font-weight:700;color:var(--ad-primary);}
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="ad-sidebar">
+    <div class="ad-sidebar__brand">
+        <div class="ad-sidebar__logo"><i class="bi bi-droplet-fill"></i></div>
+        <div><div class="ad-sidebar__name">AUTO WASH</div><div class="ad-sidebar__role">Quản trị viên</div></div>
+    </div>
+    <nav class="ad-nav">
+        <span class="ad-nav__label">Tổng quan</span>
+        <a href="/admin/dashboard" class="ad-nav__link"><i class="bi bi-grid-1x2"></i> Bảng điều khiển</a>
+        <span class="ad-nav__label">Quản lý</span>
+        <a href="/admin/bookings" class="ad-nav__link ad-nav__link--active"><i class="bi bi-calendar-check"></i> Đặt lịch</a>
+        <a href="/admin/services" class="ad-nav__link"><i class="bi bi-tools"></i> Dịch vụ & Giá</a>
+        <a href="/admin/customers" class="ad-nav__link"><i class="bi bi-people"></i> Khách hàng</a>
+        <a href="/admin/promotions" class="ad-nav__link"><i class="bi bi-tag"></i> Khuyến mãi</a>
+        <a href="/admin/loyalty" class="ad-nav__link"><i class="bi bi-star"></i> Hạng Loyalty</a>
+        <span class="ad-nav__label">Hệ thống</span>
+        <a href="/admin/reports" class="ad-nav__link"><i class="bi bi-bar-chart"></i> Báo cáo</a>
+        <a href="/logout" class="ad-nav__link ad-nav__link--logout" style="margin-top:1rem;"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+    </nav>
+</aside>
+
+<div class="ad-main">
+    <div class="ad-topbar">
+        <div>
+            <div class="ad-topbar__title"><i class="bi bi-calendar-check" style="color:var(--ad-accent);margin-right:.4rem;"></i>Quản lý đặt lịch</div>
+            <div class="ad-topbar__breadcrumb">Admin / Đặt lịch</div>
+        </div>
+        <div class="ad-admin-badge"><i class="bi bi-shield-fill-check"></i> Admin</div>
+    </div>
+
+    <div class="ad-content">
+        <!-- Flash -->
+        <div th:if="${success}" class="ad-flash ad-flash--success"><i class="bi bi-check-circle-fill"></i><span th:text="${success}"></span></div>
+        <div th:if="${error}" class="ad-flash ad-flash--error"><i class="bi bi-exclamation-triangle-fill"></i><span th:text="${error}"></span></div>
+
+        <!-- Mini stats -->
+        <div class="ad-stats-row">
+            <div class="ad-mini-stat">
+                <div class="ad-mini-stat__label">Tổng đơn</div>
+                <div class="ad-mini-stat__value" th:text="${bookings != null ? #lists.size(bookings) : 0}">0</div>
+            </div>
+            <div class="ad-mini-stat" th:each="entry : ${bookingStats}" th:if="${entry.key == 'PENDING' or entry.key == 'CONFIRMED' or entry.key == 'COMPLETED'}">
+                <div class="ad-mini-stat__label"
+                     th:text="${entry.key == 'PENDING' ? 'Chờ xử lý' : entry.key == 'CONFIRMED' ? 'Đã xác nhận' : 'Hoàn thành'}">
                 </div>
-                <table class="aw-table">
+                <div class="ad-mini-stat__value" th:text="${entry.value}">0</div>
+            </div>
+        </div>
+
+        <div class="ad-card">
+            <div class="ad-card__head">
+                <div class="ad-card__title"><i class="bi bi-list-ul"></i> Danh sách đặt lịch</div>
+                <!-- Filter Form -->
+                <form th:action="@{/admin/bookings}" method="get" class="ad-filter-bar">
+                    <div style="position:relative;">
+                        <i class="bi bi-search" style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#94a3b8;"></i>
+                        <input type="text" name="customerQuery" th:value="${customerQuery}"
+                               placeholder="Tìm theo tên / email khách hàng"
+                               class="ad-input" style="padding-left:2.5rem;min-width:260px;"/>
+                    </div>
+                    <select name="status" class="ad-select">
+                        <option value="" th:selected="${selectedStatus == null or selectedStatus == ''}">Tất cả trạng thái</option>
+                        <option th:each="statusOption : ${statusOptions}"
+                                th:value="${statusOption}"
+                                th:selected="${statusOption == selectedStatus}"
+                                th:text="${statusOption == 'PENDING' ? 'Chờ xác nhận' :
+                                           statusOption == 'CONFIRMED' ? 'Đã xác nhận' :
+                                           statusOption == 'COMPLETED' ? 'Hoàn thành' :
+                                           statusOption == 'CANCELLED' ? 'Đã hủy' : statusOption}">
+                        </option>
+                    </select>
+                    <button type="submit" class="ad-btn ad-btn--primary"><i class="bi bi-funnel"></i> Lọc</button>
+                    <a href="/admin/bookings" class="ad-btn ad-btn--ghost"><i class="bi bi-x-lg"></i> Xóa lọc</a>
+                </form>
+            </div>
+
+            <!-- Table -->
+            <div style="overflow-x:auto;">
+                <table class="ad-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Khách hàng</th>
-                            <th>Xe</th>
-                            <th>Thời gian</th>
+                            <th>ID Xe</th>
+                            <th>Thời gian hẹn</th>
                             <th>Trạng thái</th>
-                            <th>Giá</th>
+                            <th>Giá (₫)</th>
                             <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="booking : ${bookings}">
-                            <td th:text="${booking.id}">1</td>
-                            <td th:text="${customerNames[booking.customerId] != null ? customerNames[booking.customerId] : booking.customerId}">1</td>
-                            <td th:text="${booking.vehicleId}">1</td>
-                            <td th:text="${#dates.format(booking.bookingTime, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
-                            <td th:text="${booking.status}">PENDING</td>
-                            <td th:text="${booking.totalPrice != null ? booking.totalPrice : 0}">0</td>
                             <td>
-                                <form th:action="@{/admin/bookings/{id}/status(id=${booking.id})}" method="post" style="display:inline-block; margin-right:0.5rem;">
-                                    <select name="status" class="aw-select">
-                                        <option th:selected="${booking.status == 'PENDING'}">PENDING</option>
-                                        <option th:selected="${booking.status == 'CONFIRMED'}">CONFIRMED</option>
-                                        <option th:selected="${booking.status == 'COMPLETED'}">COMPLETED</option>
-                                        <option th:selected="${booking.status == 'CANCELLED'}">CANCELLED</option>
-                                    </select>
-                                    <button type="submit" class="aw-btn aw-btn--ghost">Cập nhật</button>
-                                </form>
+                                <div style="font-weight:600;" th:text="${customerNames[booking.customerId] != null ? customerNames[booking.customerId] : '—'}">Khách hàng</div>
+                                <div style="font-size:.72rem;color:var(--ad-muted);">Booking #<span th:text="${booking.id}"></span></div>
+                            </td>
+                            <td th:text="${booking.vehicleId}">1</td>
+                            <td>
+                                <div th:text="${#temporals.format(booking.bookingTime, 'HH:mm')}">09:00</div>
+                                <div style="font-size:.72rem;color:var(--ad-muted);" th:text="${#temporals.format(booking.bookingTime, 'dd/MM/yyyy')}">01/01/2026</div>
+                            </td>
+                            <td>
+                                <span th:class="${'ad-badge ad-badge--' + #strings.toLowerCase(booking.status)}"
+                                      th:text="${booking.status == 'PENDING' ? 'Chờ xác nhận' :
+                                                 booking.status == 'CONFIRMED' ? 'Đã xác nhận' :
+                                                 booking.status == 'COMPLETED' ? 'Hoàn thành' :
+                                                 booking.status == 'CANCELLED' ? 'Đã hủy' : booking.status}">
+                                </span>
+                            </td>
+                            <td class="ad-price" th:text="${booking.totalPrice != null ? #numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT') : '0'}">0</td>
+                            <td>
+                                <div class="ad-actions">
+                                    <form th:action="@{/admin/bookings/{id}/status(id=${booking.id})}" method="post" style="display:flex;gap:.4rem;align-items:center;">
+                                        <select name="status" class="ad-status-select">
+                                            <option value="PENDING"    th:selected="${booking.status == 'PENDING'}">Chờ xác nhận</option>
+                                            <option value="CONFIRMED"  th:selected="${booking.status == 'CONFIRMED'}">Đã xác nhận</option>
+                                            <option value="COMPLETED"  th:selected="${booking.status == 'COMPLETED'}">Hoàn thành</option>
+                                            <option value="CANCELLED"  th:selected="${booking.status == 'CANCELLED'}">Đã hủy</option>
+                                        </select>
+                                        <button type="submit" class="ad-btn ad-btn--ghost ad-btn--sm" title="Cập nhật trạng thái">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/admin/bookings/{id}/delete(id=${booking.id})}" method="post"
+                                          th:attr="onsubmit='return confirm(\'Bạn có chắc muốn xóa lịch đặt này? Hành động này không thể hoàn tác.\')'">
+                                        <button type="submit" class="ad-btn ad-btn--danger ad-btn--sm" title="Xóa lịch đặt này">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <tr th:if="${bookings == null or #lists.isEmpty(bookings)}">
-                            <td colspan="7">Không có đặt chỗ nào.</td>
+                            <td colspan="6">
+                                <div class="ad-empty">
+                                    <i class="bi bi-calendar-x"></i>
+                                    Không tìm thấy đặt lịch nào phù hợp.
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
 </div>
 </body>
