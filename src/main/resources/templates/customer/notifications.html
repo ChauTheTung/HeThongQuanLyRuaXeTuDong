@@ -7,9 +7,39 @@
     <div class="aw-main">
         <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
-            <section class="aw-card">
-                <h2>Thông báo của bạn</h2>
-                <p>Bạn chưa có thông báo mới.</p>
+            <section class="aw-card" style="padding: 1.5rem 2rem;">
+                <div class="aw-page-header" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--aw-border); padding-bottom: 1rem;">
+                    <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--aw-primary);">Thông báo của bạn</h2>
+                    <p style="margin: 0.25rem 0 0 0; color: var(--aw-text-muted); font-size: 0.9rem;">Cập nhật thông tin lịch đặt xe, điểm thưởng và ưu đãi cá nhân.</p>
+                </div>
+                
+                <div th:if="${notifications == null or #lists.isEmpty(notifications)}" style="text-align: center; padding: 3rem 1rem;">
+                    <i class="bi bi-bell-slash" style="font-size: 3rem; color: var(--aw-border); display: block; margin-bottom: 1rem;"></i>
+                    <p style="color: var(--aw-text-muted); font-size: 0.95rem; margin: 0;">Bạn chưa có thông báo mới.</p>
+                </div>
+
+                <ul th:if="${notifications != null and !#lists.isEmpty(notifications)}" class="aw-notification-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem;">
+                    <li th:each="notif : ${notifications}" class="aw-notification-item" 
+                        style="display: flex; gap: 1.25rem; padding: 1.25rem; border-radius: 12px; background: #ffffff; border: 1px solid var(--aw-border); align-items: flex-start; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s;">
+                        
+                        <div class="aw-notification-item__icon" 
+                             th:style="${'padding: 0.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; ' + 
+                                       (notif.type == 'success' ? 'background: #e8f5e9; color: #2e7d32;' : 
+                                       (notif.type == 'warning' ? 'background: #fff3e0; color: #e65100;' : 
+                                       (notif.type == 'danger' ? 'background: #ffebee; color: #c62828;' : 
+                                       'background: #e3f2fd; color: #0d47a1;')))}">
+                            <i class="bi" th:classappend="${notif.icon}" style="font-size: 1.35rem; display: block; height: 1.35rem; width: 1.35rem; text-align: center; line-height: 1.35rem;"></i>
+                        </div>
+                        
+                        <div class="aw-notification-item__body" style="flex: 1; min-width: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                                <h4 th:text="${notif.title}" style="margin: 0 0 0.35rem 0; font-size: 1.05rem; font-weight: 700; color: var(--aw-text);">Tiêu đề</h4>
+                                <span th:text="${#temporals.format(notif.time, 'dd/MM/yyyy HH:mm')}" style="font-size: 0.75rem; color: var(--aw-text-muted); font-weight: 500;">01/01/2026 12:00</span>
+                            </div>
+                            <p th:text="${notif.content}" style="margin: 0; font-size: 0.9rem; color: var(--aw-text-muted); line-height: 1.5; word-wrap: break-word;"></p>
+                        </div>
+                    </li>
+                </ul>
             </section>
         </main>
     </div>

@@ -10,6 +10,8 @@ import com.autowash.service.LoyaltyService;
 import com.autowash.service.PromotionService;
 import com.autowash.service.VehicleService;
 import com.autowash.service.PricingService;
+import com.autowash.service.NotificationService;
+import com.autowash.dto.NotificationDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,6 +36,7 @@ public class CustomerPageController {
     private final PromotionService promotionService;
     private final AuthService authService;
     private final PricingService pricingService;
+    private final NotificationService notificationService;
 
     public CustomerPageController(CustomerService customerService,
                                   BookingService bookingService,
@@ -41,7 +44,8 @@ public class CustomerPageController {
                                   LoyaltyService loyaltyService,
                                   PromotionService promotionService,
                                   AuthService authService,
-                                  PricingService pricingService) {
+                                  PricingService pricingService,
+                                  NotificationService notificationService) {
         this.customerService = customerService;
         this.bookingService = bookingService;
         this.vehicleService = vehicleService;
@@ -49,6 +53,7 @@ public class CustomerPageController {
         this.promotionService = promotionService;
         this.authService = authService;
         this.pricingService = pricingService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/dashboard")
@@ -187,6 +192,8 @@ public class CustomerPageController {
     public String notifications(Model model, Authentication authentication) {
         Customer customer = getCurrentCustomer(authentication);
         addCommonProfileAttributes(model, customer);
+        List<NotificationDTO> notifs = notificationService.getNotificationsForCustomer(customer.getId());
+        model.addAttribute("notifications", notifs);
         return "customer/notifications";
     }
 
@@ -234,7 +241,8 @@ public class CustomerPageController {
         model.addAttribute("profile", customer);
         model.addAttribute("loyaltyPoints", customer.getLoyaltyPoints());
         model.addAttribute("memberTier", loyaltyService.getLoyaltyInfo(customer.getId()).getCurrentTier());
-        model.addAttribute("notifCount", 3);
+        List<NotificationDTO> notifs = notificationService.getNotificationsForCustomer(customer.getId());
+        model.addAttribute("notifCount", notifs.size() > 5 ? 5 : notifs.size());
         model.addAttribute("vehicleCount", vehicleService.getVehiclesByCustomerId(customer.getId()).size());
         model.addAttribute("totalWashes", bookingService.getBookingsByCustomerId(customer.getId()).size());
     }
