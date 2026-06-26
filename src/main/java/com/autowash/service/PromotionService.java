@@ -36,6 +36,10 @@ public class PromotionService {
         return promotionRepository.findByTierName(tierName);
     }
 
+    public Promotion getActivePromotionByName(String name) {
+        return promotionRepository.findByNameAndActiveTrue(name.trim()).orElse(null);
+    }
+
     public Promotion updatePromotion(Long id, Promotion update) {
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Promotion not found with id: " + id));

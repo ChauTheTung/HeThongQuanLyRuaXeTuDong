@@ -44,6 +44,14 @@
             </p>
             <button type="submit" class="auth-submit">ĐĂNG NHẬP</button>
         </form>
+        <div th:if="${param.error}" class="aw-alert aw-alert--error" style="margin-top:1rem;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Sai tên đăng nhập hoặc mật khẩu.</span>
+        </div>
+        <div th:if="${param.logout}" class="aw-alert aw-alert--success" style="margin-top:1rem;">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Đăng xuất thành công.</span>
+        </div>
     </section>
 
     <!-- Phải: CTA đăng ký -->

@@ -47,6 +47,7 @@ public class CustomerService {
             newCustomer.setFullName(user.getUsername());
             newCustomer.setEmail(user.getUsername());
             newCustomer.setLoyaltyPoints(0);
+            newCustomer.setRedeemablePoints(0);
             newCustomer.setCreatedAt(java.time.LocalDateTime.now());
             newCustomer.setUpdatedAt(java.time.LocalDateTime.now());
             return customerRepository.save(newCustomer);
@@ -72,6 +73,9 @@ public class CustomerService {
         if (updatedData.getLoyaltyPoints() != null) {
             existingCustomer.setLoyaltyPoints(updatedData.getLoyaltyPoints());
         }
+        if (updatedData.getRedeemablePoints() != null) {
+            existingCustomer.setRedeemablePoints(updatedData.getRedeemablePoints());
+        }
         existingCustomer.setUpdatedAt(LocalDateTime.now());
 
         return customerRepository.save(existingCustomer);
@@ -93,6 +97,11 @@ public class CustomerService {
     public Integer getLoyaltyPoints(Long id) {
         Customer customer = getCustomerById(id);
         return customer.getLoyaltyPoints() != null ? customer.getLoyaltyPoints() : 0;
+    }
+
+    public Integer getRedeemablePoints(Long id) {
+        Customer customer = getCustomerById(id);
+        return customer.getRedeemablePoints() != null ? customer.getRedeemablePoints() : 0;
     }
 
     public void deleteCustomer(Long id) {

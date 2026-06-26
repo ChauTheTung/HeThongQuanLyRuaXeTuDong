@@ -53,7 +53,8 @@ public class AuthService {
         newCustomer.setFullName(dto.getFullName() != null ? dto.getFullName() : usernameToUse);
         newCustomer.setEmail(dto.getEmail() != null ? dto.getEmail() : usernameToUse);
         newCustomer.setPhoneNumber(dto.getPhoneNumber());
-        newCustomer.setLoyaltyPoints(0);
+            newCustomer.setLoyaltyPoints(0);
+            newCustomer.setRedeemablePoints(0);
         newCustomer.setCreatedAt(LocalDateTime.now());
         newCustomer.setUpdatedAt(LocalDateTime.now());
 

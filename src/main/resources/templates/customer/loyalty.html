@@ -5,7 +5,7 @@
 <div class="aw-app">
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('loyalty', ${notifCount})}"></aside>
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${redeemablePoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
             <section class="aw-card">
                 <div class="aw-page-header">
@@ -21,8 +21,12 @@
                         <strong class="aw-stat-card__value" th:text="${loyalty.currentTier}">Bronze</strong>
                     </div>
                     <div class="aw-stat-card">
-                        <span class="aw-stat-card__label">Tổng điểm</span>
+                        <span class="aw-stat-card__label">Tổng điểm (xét hạng)</span>
                         <strong class="aw-stat-card__value" th:text="${loyalty.loyaltyPoints}">0</strong>
+                    </div>
+                    <div class="aw-stat-card">
+                        <span class="aw-stat-card__label">Điểm có thể quy đổi</span>
+                        <strong class="aw-stat-card__value" th:text="${loyalty.redeemablePoints}">0</strong>
                     </div>
                     <div class="aw-stat-card">
                         <span class="aw-stat-card__label">Điểm cần lên hạng</span>
@@ -35,22 +39,7 @@
                 </div>
             </section>
 
-            <section class="aw-card">
-                <h3>Quy đổi điểm</h3>
-                <form th:action="@{/customer/loyalty/redeem}" method="post" class="aw-form-grid">
-                    <div class="aw-form-group">
-                        <label for="points">Số điểm muốn quy đổi</label>
-                        <input type="number" id="points" name="points" min="1" required placeholder="Nhập số điểm"/>
-                    </div>
-                    <div class="aw-form-group aw-form-group--full">
-                        <label for="description">Mô tả quy đổi</label>
-                        <input type="text" id="description" name="description" placeholder="Ví dụ: Voucher giảm giá"/>
-                    </div>
-                    <div class="aw-form-actions" style="grid-column: 1 / -1;">
-                        <button type="submit" class="aw-btn aw-btn--primary">Quy đổi điểm</button>
-                    </div>
-                </form>
-            </section>
+            <!-- 'Quy đổi điểm' section removed as requested -->
 
             <section class="aw-card">
                 <h3>Thang điểm Loyalty</h3>

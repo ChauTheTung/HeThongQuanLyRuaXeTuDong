@@ -5,7 +5,7 @@
 <div class="aw-app">
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('booking', ${notifCount})}"></aside>
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${redeemablePoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
 
             <!-- Page Header -->
@@ -52,6 +52,15 @@
                         <select id="serviceName" name="serviceName" required class="aw-input">
                             <option value="" disabled selected>-- Chọn xe trước --</option>
                         </select>
+                    </div>
+                    <div class="aw-form-group">
+                        <label for="promotionCode"><i class="bi bi-ticket-detailed"></i> Mã khuyến mãi</label>
+                        <input id="promotionCode" name="promotionCode" type="text" placeholder="Nhập mã khuyến mãi nếu có" class="aw-input" />
+                    </div>
+                    <div class="aw-form-group">
+                        <label for="usedLoyaltyPoints"><i class="bi bi-star"></i> Sử dụng điểm thưởng</label>
+                        <input id="usedLoyaltyPoints" name="usedLoyaltyPoints" type="number" min="0" step="200" placeholder="200, 400, ..." class="aw-input" />
+                        <p class="aw-form-hint">200 điểm = 5% giảm giá. Có thể dùng cùng mã khuyến mãi.</p>
                     </div>
                     <div class="aw-form-group">
                         <label><i class="bi bi-tag"></i> Giá tiền</label>
@@ -119,15 +128,15 @@
                 <div th:if="${bookings != null and !#lists.isEmpty(bookings)}" class="aw-booking-cards">
                     <div th:each="booking : ${bookings}" class="aw-booking-item">
                         <div class="aw-booking-item__left">
-                            <div class="aw-booking-item__id">#<span th:text="${booking.id}">1</span></div>
-                            <div class="aw-booking-item__icon">
-                                <i class="bi bi-car-front-fill"></i>
+                                <div class="aw-booking-item__icon">
+                                    <i class="bi bi-car-front-fill"></i>
+                                </div>
                             </div>
-                        </div>
                         <div class="aw-booking-item__body">
                             <div class="aw-booking-item__row">
                                 <span class="aw-booking-item__label">
-                                    <i class="bi bi-car-front"></i> Xe #<span th:text="${booking.vehicleId}">1</span>
+                                    <i class="bi bi-car-front"></i>
+                                    <span th:text="${vehiclesMap[booking.vehicleId] != null ? (vehiclesMap[booking.vehicleId].licensePlate + ' — ' + vehiclesMap[booking.vehicleId].brand) : ('Xe #' + booking.vehicleId)}">Xe #<span th:text="${booking.vehicleId}">1</span></span>
                                 </span>
                                 <span th:text="'₫' + ${booking.totalPrice != null ? #numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT') : '0'}"
                                       class="aw-booking-item__price">₫0</span>

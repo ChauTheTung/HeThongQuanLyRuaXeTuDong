@@ -8,6 +8,8 @@ import com.autowash.exception.ResourceNotFoundException;
 import com.autowash.repository.CustomerRepository;
 import com.autowash.repository.LoyaltyTierRepository;
 import com.autowash.repository.PointTransactionRepository;
+import com.autowash.repository.BookingRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,24 +23,29 @@ public class LoyaltyService {
     private final CustomerRepository customerRepository;
     private final LoyaltyTierRepository loyaltyTierRepository;
     private final PointTransactionRepository pointTransactionRepository;
+    private final BookingRepository bookingRepository;
 
     public LoyaltyService(CustomerRepository customerRepository,
                           LoyaltyTierRepository loyaltyTierRepository,
-                          PointTransactionRepository pointTransactionRepository) {
+                          PointTransactionRepository pointTransactionRepository,
+                          BookingRepository bookingRepository) {
         this.customerRepository = customerRepository;
         this.loyaltyTierRepository = loyaltyTierRepository;
         this.pointTransactionRepository = pointTransactionRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public LoyaltyDTO getLoyaltyInfo(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 
-        int points = customer.getLoyaltyPoints() != null ? customer.getLoyaltyPoints() : 0;
+        int points = customer.getLoyaltyPoints() != null ? customer.getLoyaltyPoints() : 0; // accumulated points
+        int redeemable = customer.getRedeemablePoints() != null ? customer.getRedeemablePoints() : 0;
         LoyaltyTier tier = determineTier(points);
         LoyaltyDTO dto = new LoyaltyDTO();
         dto.setCustomerId(customer.getId());
         dto.setLoyaltyPoints(points);
+        dto.setRedeemablePoints(redeemable);
         dto.setCurrentTier(tier != null ? tier.getName() : "Bronze");
 
         loyaltyTierRepository.findFirstByMinPointsGreaterThanOrderByMinPointsAsc(points)
@@ -51,8 +58,11 @@ public class LoyaltyService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
 
-        int updatedPoints = customer.getLoyaltyPoints() + points;
-        customer.setLoyaltyPoints(updatedPoints);
+        // Earned points increase both accumulated (for tier) and redeemable balances
+        int updatedAccum = customer.getLoyaltyPoints() + points;
+        int updatedRedeemable = (customer.getRedeemablePoints() != null ? customer.getRedeemablePoints() : 0) + points;
+        customer.setLoyaltyPoints(updatedAccum);
+        customer.setRedeemablePoints(updatedRedeemable);
         customer.setUpdatedAt(LocalDateTime.now());
         customerRepository.save(customer);
 
@@ -74,12 +84,21 @@ public class LoyaltyService {
         if (points <= 0) {
             throw new IllegalArgumentException("Số điểm quy đổi phải lớn hơn 0.");
         }
-        if (customer.getLoyaltyPoints() < points) {
+        // Check redeemable balance (points that can be spent)
+        int redeemable = customer.getRedeemablePoints() != null ? customer.getRedeemablePoints() : 0;
+
+        // Prevent frequent re-redemption: disallow if last redeem was within 30 days
+        PointTransaction lastRedeem = pointTransactionRepository.findFirstByCustomerIdAndTransactionTypeOrderByCreatedAtDesc(customerId, "REDEEM");
+        if (lastRedeem != null && lastRedeem.getCreatedAt().isAfter(LocalDateTime.now().minusDays(30))) {
+            throw new IllegalArgumentException("Bạn đã đổi điểm trong 30 ngày gần đây. Vui lòng thử lại sau.");
+        }
+
+        if (redeemable < points) {
             throw new IllegalArgumentException("Không đủ điểm để quy đổi.");
         }
 
-        int updatedPoints = customer.getLoyaltyPoints() - points;
-        customer.setLoyaltyPoints(updatedPoints);
+        int updatedRedeemable = redeemable - points;
+        customer.setRedeemablePoints(updatedRedeemable);
         customer.setUpdatedAt(LocalDateTime.now());
         customerRepository.save(customer);
 
@@ -92,6 +111,31 @@ public class LoyaltyService {
         pointTransactionRepository.save(transaction);
 
         return getLoyaltyInfo(customerId);
+    }
+
+    // Daily job: reset redeemable points to 0 for customers who haven't used any booking in the last 30 days
+    @Scheduled(cron = "0 0 3 * * ?") // every day at 03:00
+    public void resetRedeemablePointsForInactiveCustomers() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(30);
+        List<Customer> customers = customerRepository.findAll();
+
+        for (Customer customer : customers) {
+            boolean hadRecentBooking = !bookingRepository.findByCustomerIdAndBookingTimeAfter(customer.getId(), cutoff).isEmpty();
+            if (!hadRecentBooking && customer.getRedeemablePoints() != null && customer.getRedeemablePoints() > 0) {
+                int old = customer.getRedeemablePoints();
+                customer.setRedeemablePoints(0);
+                customer.setUpdatedAt(LocalDateTime.now());
+                customerRepository.save(customer);
+
+                PointTransaction transaction = new PointTransaction();
+                transaction.setCustomerId(customer.getId());
+                transaction.setPoints(-old);
+                transaction.setTransactionType("EXPIRE");
+                transaction.setDescription("Reset điểm quy đổi do không sử dụng dịch vụ 30 ngày");
+                transaction.setCreatedAt(LocalDateTime.now());
+                pointTransactionRepository.save(transaction);
+            }
+        }
     }
 
     public LoyaltyTier createTier(LoyaltyTier tier) {

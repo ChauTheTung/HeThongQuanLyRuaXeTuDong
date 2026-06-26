@@ -12,4 +12,5 @@ public interface PointTransactionRepository extends JpaRepository<PointTransacti
     List<PointTransaction> findByCustomerId(Long customerId);
     List<PointTransaction> findByCustomerIdAndTransactionTypeAndCreatedAtBefore(Long customerId, String transactionType, LocalDateTime before);
     List<PointTransaction> findByCustomerIdAndCreatedAtAfter(Long customerId, LocalDateTime after);
+    PointTransaction findFirstByCustomerIdAndTransactionTypeOrderByCreatedAtDesc(Long customerId, String transactionType);
 }

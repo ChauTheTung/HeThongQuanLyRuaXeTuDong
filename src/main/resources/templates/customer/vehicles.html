@@ -5,7 +5,7 @@
 <div class="aw-app">
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('vehicles', ${notifCount})}"></aside>
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${redeemablePoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
             <section class="aw-card aw-card--grid">
                 <div>

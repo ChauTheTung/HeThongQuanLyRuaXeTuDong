@@ -11,5 +11,6 @@ public class CustomerDTO {
     private String phoneNumber;
     private String email;
     private Integer loyaltyPoints;
+    private Integer redeemablePoints;
     private String currentTier;
 }

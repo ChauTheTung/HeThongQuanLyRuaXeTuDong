@@ -35,7 +35,12 @@ public class Customer {
     private String avatarUrl;
 
     @Column(name = "loyalty_points")
+    // Accumulated points used to determine membership tier (keeps increasing even after redemption)
     private Integer loyaltyPoints = 0;
+
+    @Column(name = "redeemable_points")
+    // Points that can be spent/redeemed by the customer
+    private Integer redeemablePoints = 0;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

@@ -5,7 +5,7 @@
 <div class="aw-app">
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('history', ${notifCount})}"></aside>
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${redeemablePoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
             <section class="aw-card">
                 <div class="aw-page-header">
@@ -38,7 +38,7 @@
                     <tbody>
                     <tr th:each="booking : ${bookings}">
                         <td th:text="${booking.id}">1</td>
-                        <td th:text="${booking.vehicleId}">Xe</td>
+                        <td th:text="${vehiclesMap[booking.vehicleId] != null ? (vehiclesMap[booking.vehicleId].licensePlate + ' - ' + vehiclesMap[booking.vehicleId].brand) : ('Xe #' + booking.vehicleId)}">Xe</td>
                         <td th:text="${#temporals.format(booking.bookingTime, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
                         <td th:text="${booking.status}">COMPLETED</td>
                         <td th:text="${booking.totalPrice != null ? #numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT') : '0'}">0</td>
