@@ -154,58 +154,7 @@
                         </form>
                     </section>
 
-                    <section class="aw-card">
-                        <h3 class="aw-card__title"><i class="bi bi-bell"></i> Tùy chọn thông báo</h3>
-                        <form th:action="@{/customer/profile/notifications}" method="post">
-                            <div class="aw-toggle-list">
-                                <label class="aw-toggle-item">
-                                    <span class="aw-toggle-item__text">
-                                        <strong>Nhắc lịch hẹn rửa xe</strong>
-                                        <span>Thông báo trước 1 giờ khi đến giờ hẹn</span>
-                                    </span>
-                                    <span class="aw-switch">
-                                        <input type="checkbox" name="notifyBooking" checked/>
-                                        <span class="aw-switch__slider"></span>
-                                    </span>
-                                </label>
-                                <label class="aw-toggle-item">
-                                    <span class="aw-toggle-item__text">
-                                        <strong>Khuyến mãi &amp; voucher</strong>
-                                        <span>Nhận ưu đãi mới và mã giảm giá</span>
-                                    </span>
-                                    <span class="aw-switch">
-                                        <input type="checkbox" name="notifyPromo" checked/>
-                                        <span class="aw-switch__slider"></span>
-                                    </span>
-                                </label>
-                                <label class="aw-toggle-item">
-                                    <span class="aw-toggle-item__text">
-                                        <strong>Trạng thái rửa xe</strong>
-                                        <span>Cập nhật khi xe bắt đầu / hoàn thành rửa</span>
-                                    </span>
-                                    <span class="aw-switch">
-                                        <input type="checkbox" name="notifyWashStatus" checked/>
-                                        <span class="aw-switch__slider"></span>
-                                    </span>
-                                </label>
-                                <label class="aw-toggle-item">
-                                    <span class="aw-toggle-item__text">
-                                        <strong>Điểm thưởng</strong>
-                                        <span>Thông báo khi tích điểm hoặc lên hạng</span>
-                                    </span>
-                                    <span class="aw-switch">
-                                        <input type="checkbox" name="notifyLoyalty"/>
-                                        <span class="aw-switch__slider"></span>
-                                    </span>
-                                </label>
-                            </div>
-                            <div class="aw-form-actions">
-                                <button type="submit" class="aw-btn aw-btn--primary">
-                                    <i class="bi bi-save"></i> Lưu tùy chọn
-                                </button>
-                            </div>
-                        </form>
-                    </section>
+                    <!-- Notification options removed as per request -->
                 </div>
             </div>
         </main>
