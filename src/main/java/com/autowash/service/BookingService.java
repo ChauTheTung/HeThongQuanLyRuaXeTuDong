@@ -1,6 +1,7 @@
 package com.autowash.service;
 
 import com.autowash.entity.Booking;
+import com.autowash.service.LoyaltyService;
 import com.autowash.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ public class BookingService {
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    private LoyaltyService loyaltyService;
 
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
@@ -28,9 +32,14 @@ public class BookingService {
     public Booking updateBookingStatus(Long id, String status) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+        boolean completedBefore = "COMPLETED".equalsIgnoreCase(booking.getStatus());
         booking.setStatus(status);
         booking.setUpdatedAt(LocalDateTime.now());
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+        if (!completedBefore && "COMPLETED".equalsIgnoreCase(status)) {
+            loyaltyService.addPoints(saved.getCustomerId(), 200, "Hoàn thành đặt lịch");
+        }
+        return saved;
     }
 
     public Booking updateBooking(Long id, Booking bookingDetails) {
@@ -66,4 +75,4 @@ public class BookingService {
     public void deleteBooking(Long id) {
         bookingRepository.deleteById(id);
     }
-}
+}

@@ -14,6 +14,12 @@ import com.autowash.service.NotificationService;
 import com.autowash.dto.NotificationDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import com.autowash.entity.Promotion;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -23,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 
 @Controller
 @RequestMapping("/customer")
@@ -68,14 +73,21 @@ public class CustomerPageController {
                           Authentication authentication,
                           @RequestParam(required = false) String status) {
         Customer customer = getCurrentCustomer(authentication);
+        String tier = loyaltyService.getLoyaltyInfo(customer.getId()).getCurrentTier();
+        int minBookingDays = getBookingAdvanceDays(tier);
+
         model.addAttribute("bookings", status != null && !status.isBlank()
                 ? bookingService.getBookingsByCustomerIdAndStatus(customer.getId(), status)
                 : bookingService.getBookingsByCustomerId(customer.getId()));
-        model.addAttribute("vehicles", vehicleService.getVehiclesByCustomerId(customer.getId()));
+        List<Vehicle> vehicles = vehicleService.getVehiclesByCustomerId(customer.getId());
+        model.addAttribute("vehicles", vehicles);
+        Map<Long, Vehicle> vehiclesMap = vehicles.stream().collect(Collectors.toMap(Vehicle::getId, v -> v));
+        model.addAttribute("vehiclesMap", vehiclesMap);
         model.addAttribute("servicesList", pricingService.getAllServices());
         model.addAttribute("newBooking", new Booking());
         model.addAttribute("statusOptions", List.of("PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"));
         model.addAttribute("selectedStatus", status);
+        model.addAttribute("minBookingDays", minBookingDays);
         addCommonProfileAttributes(model, customer);
         return "customer/booking";
     }
@@ -85,20 +97,73 @@ public class CustomerPageController {
         Customer customer = getCurrentCustomer(authentication);
         booking.setCustomerId(customer.getId());
         booking.setStatus("PENDING");
-        
-        // Tính toán lại giá dựa trên Dịch vụ và Loại xe để tránh gian lận
+
+        int minBookingDays = getBookingAdvanceDays(loyaltyService.getLoyaltyInfo(customer.getId()).getCurrentTier());
+        if (booking.getBookingTime() == null) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn thời gian hẹn.");
+            return "redirect:/customer/booking";
+        }
+
+        LocalDate minAllowedDate = LocalDate.now().plusDays(minBookingDays);
+        if (booking.getBookingTime().toLocalDate().isBefore(minAllowedDate)) {
+            redirectAttributes.addFlashAttribute("error", "Hạng " + loyaltyService.getLoyaltyInfo(customer.getId()).getCurrentTier() + " chỉ được đặt lịch trước tối thiểu " + minBookingDays + " ngày.");
+            return "redirect:/customer/booking";
+        }
+
         if (booking.getVehicleId() != null && booking.getServiceName() != null) {
             Vehicle vehicle = vehicleService.getVehiclesByCustomerId(customer.getId()).stream()
                     .filter(v -> v.getId().equals(booking.getVehicleId()))
                     .findFirst().orElse(null);
             if (vehicle != null) {
-                pricingService.getServicesByVehicleType(vehicle.getVehicleType()).stream()
+                var serviceOpt = pricingService.getServicesByVehicleType(vehicle.getVehicleType()).stream()
                         .filter(s -> s.getServiceName().equals(booking.getServiceName()))
-                        .findFirst()
-                        .ifPresent(service -> booking.setTotalPrice(service.getPrice()));
+                        .findFirst();
+                if (serviceOpt.isPresent()) {
+                    var service = serviceOpt.get();
+                    booking.setServicePrice(service.getPrice());
+                    double discountPercent = 0.0;
+
+                    if (booking.getPromotionCode() != null && !booking.getPromotionCode().isBlank()) {
+                        Promotion promo = promotionService.getActivePromotionByName(booking.getPromotionCode());
+                        if (promo == null) {
+                            redirectAttributes.addFlashAttribute("error", "Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
+                            return "redirect:/customer/booking";
+                        }
+                        String currentTier = loyaltyService.getLoyaltyInfo(customer.getId()).getCurrentTier();
+                        if (promo.getTierName() != null && !promo.getTierName().isBlank() && !promo.getTierName().equalsIgnoreCase(currentTier)) {
+                            redirectAttributes.addFlashAttribute("error", "Mã khuyến mãi không phù hợp với hạng của bạn.");
+                            return "redirect:/customer/booking";
+                        }
+                        discountPercent += promo.getDiscountPercent() != null ? promo.getDiscountPercent() : 0.0;
+                    }
+
+                    if (booking.getUsedLoyaltyPoints() != null && booking.getUsedLoyaltyPoints() > 0) {
+                        int points = booking.getUsedLoyaltyPoints();
+                        if (points % 200 != 0) {
+                            redirectAttributes.addFlashAttribute("error", "Số điểm sử dụng phải là bội số của 200.");
+                            return "redirect:/customer/booking";
+                        }
+                        if (customer.getRedeemablePoints() < points) {
+                            redirectAttributes.addFlashAttribute("error", "Bạn không có đủ điểm để sử dụng.");
+                            return "redirect:/customer/booking";
+                        }
+                        double loyaltyDiscount = 5.0 * (points / 200);
+                        discountPercent += loyaltyDiscount;
+                        loyaltyService.redeemPoints(customer.getId(), points, "Sử dụng điểm để được giảm giá đặt lịch");
+                    }
+
+                    booking.setDiscountPercent(discountPercent);
+                    double price = service.getPrice();
+                    booking.setTotalPrice(price * Math.max(0.0, (100.0 - discountPercent) / 100.0));
+                }
             }
         }
-        
+
+        if (booking.getTotalPrice() == null || booking.getTotalPrice() <= 0) {
+            redirectAttributes.addFlashAttribute("error", "Không thể tính toán giá đặt lịch. Vui lòng kiểm tra thông tin.");
+            return "redirect:/customer/booking";
+        }
+
         bookingService.createBooking(booking);
         redirectAttributes.addFlashAttribute("success", "Đặt lịch rửa xe thành công.");
         return "redirect:/customer/booking";
@@ -147,9 +212,13 @@ public class CustomerPageController {
     public String history(Model model, Authentication authentication,
                           @RequestParam(required = false) String status) {
         Customer customer = getCurrentCustomer(authentication);
-        model.addAttribute("bookings", status != null && !status.isBlank()
-                ? bookingService.getBookingsByCustomerIdAndStatus(customer.getId(), status)
-                : bookingService.getBookingsByCustomerId(customer.getId()));
+        List<Booking> bookings = status != null && !status.isBlank()
+            ? bookingService.getBookingsByCustomerIdAndStatus(customer.getId(), status)
+            : bookingService.getBookingsByCustomerId(customer.getId());
+        model.addAttribute("bookings", bookings);
+        List<Vehicle> vehicles = vehicleService.getVehiclesByCustomerId(customer.getId());
+        Map<Long, Vehicle> vehiclesMap = vehicles.stream().collect(Collectors.toMap(Vehicle::getId, v -> v));
+        model.addAttribute("vehiclesMap", vehiclesMap);
         model.addAttribute("statusOptions", List.of("PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"));
         model.addAttribute("selectedStatus", status);
         addCommonProfileAttributes(model, customer);
@@ -178,6 +247,17 @@ public class CustomerPageController {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
         }
         return "redirect:/customer/loyalty";
+    }
+
+    private int getBookingAdvanceDays(String tierName) {
+        if (tierName == null) {
+            return 7;
+        }
+        return switch (tierName.toUpperCase()) {
+            case "GOLD" -> 2;
+            case "SILVER" -> 5;
+            default -> 7;
+        };
     }
 
     @GetMapping("/promotions")
@@ -240,6 +320,7 @@ public class CustomerPageController {
     private void addCommonProfileAttributes(Model model, Customer customer) {
         model.addAttribute("profile", customer);
         model.addAttribute("loyaltyPoints", customer.getLoyaltyPoints());
+        model.addAttribute("redeemablePoints", customer.getRedeemablePoints());
         model.addAttribute("memberTier", loyaltyService.getLoyaltyInfo(customer.getId()).getCurrentTier());
         List<NotificationDTO> notifs = notificationService.getNotificationsForCustomer(customer.getId());
         model.addAttribute("notifCount", notifs.size() > 5 ? 5 : notifs.size());

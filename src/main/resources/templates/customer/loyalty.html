@@ -5,7 +5,7 @@
 <div class="aw-app">
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('loyalty', ${notifCount})}"></aside>
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${redeemablePoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
             <section class="aw-card">
                 <div class="aw-page-header">
@@ -21,8 +21,12 @@
                         <strong class="aw-stat-card__value" th:text="${loyalty.currentTier}">Bronze</strong>
                     </div>
                     <div class="aw-stat-card">
-                        <span class="aw-stat-card__label">Tổng điểm</span>
+                        <span class="aw-stat-card__label">Tổng điểm (xét hạng)</span>
                         <strong class="aw-stat-card__value" th:text="${loyalty.loyaltyPoints}">0</strong>
+                    </div>
+                    <div class="aw-stat-card">
+                        <span class="aw-stat-card__label">Điểm có thể quy đổi</span>
+                        <strong class="aw-stat-card__value" th:text="${loyalty.redeemablePoints}">0</strong>
                     </div>
                     <div class="aw-stat-card">
                         <span class="aw-stat-card__label">Điểm cần lên hạng</span>

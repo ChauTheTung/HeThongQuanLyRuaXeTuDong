@@ -22,7 +22,7 @@
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('profile', ${notifCount})}"></aside>
 
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(${fullName}, ${tier}, ${points}, ${notifCount}, ${avatar})}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${fullName}, ${tier}, ${points}, ${redeemablePoints}, ${notifCount}, ${avatar})}"></header>
 
         <main class="aw-main__content">
             <div class="aw-page-header">

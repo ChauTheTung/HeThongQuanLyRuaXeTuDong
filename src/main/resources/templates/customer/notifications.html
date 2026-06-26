@@ -5,7 +5,7 @@
 <div class="aw-app" th:with="notifCount=${notifCount}">
     <aside th:replace="~{fragments/sidebar :: customer-sidebar('notifications', ${notifCount})}"></aside>
     <div class="aw-main">
-        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${notifCount}, null)}"></header>
+        <header th:replace="~{fragments/navbar :: customer-navbar(${profile.fullName}, ${memberTier}, ${loyaltyPoints}, ${redeemablePoints}, ${notifCount}, null)}"></header>
         <main class="aw-main__content">
             <section class="aw-card" style="padding: 1.5rem 2rem;">
                 <div class="aw-page-header" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--aw-border); padding-bottom: 1rem;">

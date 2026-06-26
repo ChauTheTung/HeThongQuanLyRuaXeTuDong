@@ -3,17 +3,18 @@
 <body>
 
 <!--
-  Fragment navbar khách hàng.
-  Tham số (tùy chọn): userName, memberTier, loyaltyPoints, notificationCount, avatarUrl
+    Fragment navbar khách hàng.
+    Tham số (tùy chọn): userName, memberTier, loyaltyPoints, redeemablePoints, notificationCount, avatarUrl
 -->
-<header class="aw-navbar" th:fragment="customer-navbar(userName, memberTier, loyaltyPoints, notificationCount, avatarUrl)"
-        th:with="
-            displayName=${userName != null ? userName : 'Nguyễn Văn A'},
-            tier=${memberTier != null ? memberTier : 'Gold Member'},
-            points=${loyaltyPoints != null ? loyaltyPoints : '1.200'},
-            notifCount=${notificationCount != null ? notificationCount : 3},
-            avatar=${avatarUrl != null ? avatarUrl : 'https://i.pravatar.cc/80?img=12'}
-        ">
+<header class="aw-navbar" th:fragment="customer-navbar(userName, memberTier, loyaltyPoints, redeemablePoints, notificationCount, avatarUrl)"
+                th:with="
+                        displayName=${userName != null ? userName : 'Nguyễn Văn A'},
+                        tier=${memberTier != null ? memberTier : 'Gold Member'},
+                        points=${loyaltyPoints != null ? loyaltyPoints : '1.200'},
+                        redeemable=${redeemablePoints != null ? redeemablePoints : 0},
+                        notifCount=${notificationCount != null ? notificationCount : 3},
+                        avatar=${avatarUrl != null ? avatarUrl : 'https://i.pravatar.cc/80?img=12'}
+                ">
 
     <form class="aw-navbar__search" role="search" th:action="@{/customer/search}" method="get">
         <i class="bi bi-search" aria-hidden="true"></i>
@@ -29,6 +30,7 @@
                 <span class="aw-navbar__member-tier" th:text="${tier}">Gold Member</span>
                 <span class="aw-navbar__member-points">
                     <span th:text="${points}">1.200</span> điểm
+                    <small style="display:block; font-size:0.75rem; color:var(--aw-text-muted);">(có thể dùng: <span th:text="${redeemable}">0</span> điểm)</small>
                 </span>
             </span>
         </a>

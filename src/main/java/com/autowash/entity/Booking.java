@@ -21,6 +21,18 @@ public class Booking {
     @Column(name = "service_name")
     private String serviceName;
 
+    @Column(name = "promotion_code")
+    private String promotionCode;
+
+    @Column(name = "used_loyalty_points")
+    private Integer usedLoyaltyPoints = 0;
+
+    @Column(name = "discount_percent")
+    private Double discountPercent = 0.0;
+
+    @Column(name = "service_price")
+    private Double servicePrice = 0.0;
+
     @Column(name = "booking_time", nullable = false)
     private LocalDateTime bookingTime;
 
